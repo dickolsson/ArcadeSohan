@@ -88,7 +88,7 @@ When creating new games, use these existing modules:
 
 | Module | Key Functions |
 |--------|---------------|
-| **Display.h** | `effacerEcran()`, `afficherEcran()`, `ecrireTexte()`, `dessinerRectangle()`, `dessinerCercle()`, `dessinerLigne()` |
+| **Display.h** | `DESSINER_ECRAN`, `ecrireTexte()`, `dessinerRectangle()`, `dessinerCercle()`, `dessinerLigne()` - See `.github/instructions/display.instructions.md` |
 | **Input.h** | `lireJoystick()`, `boutonJustePresse()`, `joystickHaut()`, `joystickBas()`, `joystickGauche()`, `joystickDroite()` |
 | **Melodies.h** | `melodieStartup()`, `melodieGameOver()`, `melodieTir()` |
 | **ProgMem.h** | `NIVEAU_PROGMEM()`, `CONFIG_PROGMEM()`, `TEXTE_PROGMEM()`, `pm_charger3Colonnes()`, `pm_lireTexte()` |
@@ -170,206 +170,80 @@ if (numeroJeu == X) {
 
 ## ⚠️ CRITICAL: Arduino Memory Constraints
 
-The Arduino Uno has **very limited memory**. Ignoring these rules causes crashes!
+**See `.github/instructions/memory.instructions.md` for full details!**
 
-### Memory Budget
+The Arduino Uno has **very limited memory**:
 
-| Memory Type | Total | Safe Usage | Why |
-|-------------|-------|------------|-----|
-| Program | 32 KB | < 75% | Leave room for optimizations |
-| RAM | 2048 bytes | < 35-38% | OLED buffer takes 1024 bytes! |
+| Memory Type | Total | Safe Usage |
+|-------------|-------|------------|
+| Program (Flash) | 32 KB | < 85% |
+| RAM | 2048 bytes | < 60% |
 
-### Why RAM Usage Is Deceptive
+### Key Rules
 
-The compiler reports RAM usage but **does NOT count**:
-- **OLED display buffer: 1024 bytes** (half of total RAM!)
-- Stack space for function calls
-- Local variables inside functions
-
-**🚨 RULE: If compiler says 40%+ RAM, the game WILL crash!**
-
-### Memory-Safe Coding Rules
-
-1. **Maximum 5-6 game objects**
-   - ❌ `int plat[12][3]` = too many, will crash
-   - ✅ `int plat[5][3]` = safe
-
-2. **One combined function instead of many small ones**
-   - ❌ Separate functions `niveau1()`, `niveau2()`, `niveau3()`, `niveau4()`
-   - ✅ One function with `if/else`: `creerNiveau() { if (niveau == 1) {...} }`
-
-3. **Avoid melody functions during gameplay**
-   - ❌ `melodieVictoireBoss()` in game loop = crash risk
-   - ✅ Simple `tone(PIN, 1000, 100)` or no sound
-
-4. **No camera/scrolling** - adds complexity and memory
-
-5. **Keep level transitions simple**
-   - ❌ Multiple `ecrireTexte()` calls + melody + delays
-   - ✅ One message, short delay, move on
+1. **Maximum 5-6 game objects** - `int plat[5][3]` not `int plat[12][3]`
+2. **Use ProgMem.h** for level data, config, and text strings
+3. **Keep level transitions simple** - one message, short delay
+4. **Use `int8_t`** for small values (niveau, vies, direction)
 
 ### Safe Game Template
 
 ```cpp
-// Maximum objects
 #define MAX_OBJETS 5
+int objets[MAX_OBJETS][3];
 
-// Small arrays only!
-int objets[MAX_OBJETS][3];  // x, y, type
-int nbObjets = 0;
-
-// Simple level transition - NO MELODY!
 void niveauTermine() {
-  effacerEcran();
-  ecrireTexte(20, 20, "BRAVO!", 2);
-  afficherEcran();
+  DESSINER_ECRAN {
+    ecrireTexte(20, 20, "BRAVO!", 2);
+  }
   delay(1500);
   niveau++;
-  resetJoueur();
   creerNiveau();
 }
 ```
 
 ---
 
-## 💾 CRITICAL: Use ProgMem.h to Save RAM!
+## 💾 ProgMem.h - Store Data in Flash
 
-The `ProgMem.h` module stores data in **Flash memory (32KB)** instead of **RAM (2KB)**. This is essential for games with multiple levels, configuration data, or text strings.
+**See `.github/instructions/memory.instructions.md` for full API reference!**
 
-**Always include ProgMem.h in new games:**
-```cpp
-#include "ProgMem.h"
-```
-
-### When to Use PROGMEM
-
-| Data Type | Use PROGMEM? | RAM Saved |
-|-----------|--------------|-----------|
-| Level layouts (platforms, enemies) | ✅ YES | ~15-20 bytes per level |
-| Per-level configuration (speed, HP) | ✅ YES | ~10-30 bytes |
-| Text strings (messages, titles) | ✅ YES | ~10 bytes per string |
-| Player position, score | ❌ NO | Changes during gameplay |
-| Current level data (active copy) | ❌ NO | Needs to be in RAM |
-
-### Defining Data in PROGMEM
-
-```cpp
-// Byte arrays (values 0-255)
-DONNEES_BYTE(gn_speeds, { 1, 2, 3, 4, 5 });
-CONFIG_PROGMEM(gn_bossHP, { 3, 4, 5, 6, 7 });
-
-// Platform levels: x, y, width per platform
-NIVEAU_PROGMEM(gn_niveau1, {
-  0, 56, 40,    // Platform 1
-  45, 46, 30,   // Platform 2
-  80, 38, 25    // Platform 3
-});
-
-// Text strings
-TEXTE_PROGMEM(gn_txtGameOver, "GAME OVER");
-TEXTE_PROGMEM(gn_txtBravo, "BRAVO!");
-```
-
-### Reading PROGMEM Data
-
-#### Single Values (Configuration)
-
-```cpp
-// Read config at index (0-based)
-int vitesse = pm_lireConfig(gn_speeds, niveau - 1);
-
-// Read with default if index out of bounds
-int bossHP = pm_lireConfigOuDefaut(gn_bossHP, niveau - 1, 5, 10);
-//                                  array      index     size default
-```
-
-#### Loading Arrays into RAM
-
-```cpp
-// Destination array in RAM
-int gn_plat[5][3];
-
-// Load platforms from PROGMEM
-pm_charger3Colonnes(gn_niveau1, gn_plat, 3);  // 3 platforms
-
-// For [n][2] arrays (x, y positions)
-pm_charger2Colonnes(gn_positions, gn_pos, 4);
-
-// Load a pair of values (door position)
-int porteX, porteY;
-pm_chargerPaire(gn_porte1, &porteX, &porteY);
-```
-
-#### Reading Text
-
-```cpp
-// Use pm_lireTexte() to read PROGMEM text
-ecrireTexte(10, 10, pm_lireTexte(gn_txtGameOver), 2);
-ecrireTexte(20, 30, pm_lireTexte(gn_txtBravo), 1);
-```
-
-### Complete PROGMEM Game Pattern
+Store level data and text in Flash (32KB) instead of RAM (2KB):
 
 ```cpp
 #include "ProgMem.h"
 
-// ===== PROGMEM DATA (in Flash) =====
+// Define in PROGMEM (Flash)
 NIVEAU_PROGMEM(gn_niv1, { 0,56,40, 45,46,30, 80,38,25 });
-NIVEAU_PROGMEM(gn_niv2, { 0,56,40, 35,44,25, 70,32,30 });
 CONFIG_PROGMEM(gn_vitesse, { 1, 2, 3, 4, 5 });
-TEXTE_PROGMEM(gn_txtVictoire, "BRAVO!");
+TEXTE_PROGMEM(gn_txtBravo, "BRAVO!");
 
-// ===== RAM VARIABLES (active data) =====
-int gn_plat[3][3];  // Only current level in RAM
-int gn_niveau = 1;
+// RAM: only current level
+int gn_plat[3][3];
 
-// ===== LOAD LEVEL =====
+// Load from PROGMEM when needed
 void gn_creerNiveau() {
-  if (gn_niveau == 1) {
-    pm_charger3Colonnes(gn_niv1, gn_plat, 3);
-  } else if (gn_niveau == 2) {
-    pm_charger3Colonnes(gn_niv2, gn_plat, 3);
-  }
+  pm_charger3Colonnes(gn_niv1, gn_plat, 3);
 }
 
-// ===== USE CONFIG =====
-void gn_updateVitesse() {
-  int v = pm_lireConfigOuDefaut(gn_vitesse, gn_niveau-1, 5, 5);
-  // Use v...
-}
+// Read text
+ecrireTexte(10, 10, pm_lireTexte(gn_txtBravo), 2);
 ```
-
-### ProgMem.h Quick Reference
-
-| Macro/Function | Purpose |
-|----------------|---------|
-| `DONNEES_BYTE(name, {...})` | Define byte array in Flash |
-| `CONFIG_PROGMEM(name, {...})` | Alias for config data |
-| `NIVEAU_PROGMEM(name, {...})` | Alias for level data |
-| `TEXTE_PROGMEM(name, "text")` | Define text string in Flash |
-| `pm_lireConfig(arr, idx)` | Read single byte at index |
-| `pm_lireConfigOuDefaut(arr, idx, size, def)` | Read with fallback |
-| `pm_charger2Colonnes(src, dest, n)` | Load [n][2] array |
-| `pm_charger3Colonnes(src, dest, n)` | Load [n][3] array |
-| `pm_charger4Colonnes(src, dest, n)` | Load [n][4] array |
-| `pm_chargerPaire(src, &a, &b)` | Load two values |
-| `pm_lireTexte(txtProgmem)` | Read text to buffer |
 
 ---
 
 ## 🎲 Procedural Generation with Procedural.h
 
-For **infinite levels** without memory cost, use `Procedural.h`:
+For **infinite levels** without memory cost - see `.github/instructions/memory.instructions.md` for details.
 
 ```cpp
 #include "Procedural.h"
 
 void gn_creerNiveau() {
-  if (gn_niveau <= 4) {
-    // Hand-crafted levels from PROGMEM
+  if (gn_niveau <= 3) {
     pm_charger3Colonnes(gn_niveaux[gn_niveau], gn_plat, 5);
   } else {
-    // Procedural generation for level 5+
+    // Procedural for level 4+
     int diff = proc_calculerDifficulte(gn_niveau);
     proc_genererPlateformes(gn_niveau, gn_plat, 5, diff);
     proc_genererPorte(gn_plat, 5, &porteX, &porteY);
@@ -377,22 +251,19 @@ void gn_creerNiveau() {
 }
 ```
 
-Same seed = same level every time!
-
 ---
 
 ## 🔧 Debugging Black Screen Crashes
 
-When the screen goes black, the program crashed. **Test incrementally:**
+**See `.github/instructions/memory.instructions.md` for full debugging guide!**
 
-| Step | What to test | What it validates |
-|------|--------------|-------------------|
-| 1 | Disable new game completely | Does menu work? (tests #include) |
-| 2 | Enable include but not in menu | Tests global variables |
-| 3 | Add to menu with simple loop only | Tests setup functions |
-| 4 | Add drawing function | Tests dessiner() |
-| 5 | Add controls + physics | Tests game logic |
-| 6 | Add level transitions | **Usually crashes here!** |
+When the screen goes black, the program crashed. Test incrementally:
+
+1. Disable new game → Does menu work?
+2. Add to menu with simple loop → Setup OK?
+3. Add drawing → Drawing OK?
+4. Add controls + physics → Logic OK?
+5. Add level transitions → **Usually crashes here!**
 
 **The crash happens in the LAST feature you added.**
 

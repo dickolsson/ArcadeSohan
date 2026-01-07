@@ -307,12 +307,13 @@ void mh_activerBoss() {
   mh_placerMonstre();
   
   // Afficher alerte BOSS (Show BOSS alert)
-  effacerEcran();
-  ecrireTexte(25, 10, pm_lireTexte(mh_txtBoss), 2);
-  ecrireTexteNombre(15, 35, "Niveau ", mh_niveau, 1);
-  ecran.print(" atteint!");
-  ecrireTexte(15, 48, pm_lireTexte(mh_txtTire5Fois), 1);
-  afficherEcran();
+  // Note: Utilise DESSINER_ECRAN pour le mode page buffer
+  DESSINER_ECRAN {
+    ecrireTexte(25, 10, pm_lireTexte(mh_txtBoss), 2);
+    ecrireTexteNombre(15, 35, "Niveau ", mh_niveau, 1);
+    ecrireTexte(55, 35, "atteint!", 1);
+    ecrireTexte(15, 48, pm_lireTexte(mh_txtTire5Fois), 1);
+  }
   
   melodieAlerteBoss();
   delay(1500);
@@ -397,28 +398,19 @@ void mh_dessinerMonstre() {
   dessinerTriangle(pointeX, pointeY, base1X, base1Y, base2X, base2Y);
 }
 
-// Dessiner le jeu (Draw the game)
-void mh_dessinerJeu() {
-  effacerEcran();
-  
+// Buffer pour la barre de statut (Status bar buffer)
+char mh_statusBuffer[32];
+
+// Dessiner le contenu du jeu (Draw game content) - appelé dans la boucle page
+void mh_dessinerContenu() {
   // Score et niveau en haut (Score and level at top)
-  ecran.setTextSize(1);
-  ecran.setTextColor(SSD1306_WHITE);
-  ecran.setCursor(0, 0);
-  ecran.print("Nv:");
-  ecran.print(mh_niveau);
-  ecran.print(" ");
-  ecran.print(mh_score);
-  ecran.print("p");
-  ecran.print(" Tir:");
-  ecran.print(mh_munitions);
-  
+  // Format: "Nv:X XXXp Tir:X" ou avec boss
   if (mh_estBoss) {
-    ecran.print(" B:");
-    ecran.print(mh_vieBoss);
-    ecran.print("/");
-    ecran.print(mh_vieMaxBoss);
+    sprintf(mh_statusBuffer, "Nv:%d %dp B:%d/%d", mh_niveau, mh_score, mh_vieBoss, mh_vieMaxBoss);
+  } else {
+    sprintf(mh_statusBuffer, "Nv:%d %dp Tir:%d", mh_niveau, mh_score, mh_munitions);
   }
+  ecrireTexte(0, 0, mh_statusBuffer, 1);
   
   // Ligne sous le score (Line under score)
   dessinerLigne(0, 9, 127, 9);
@@ -436,8 +428,13 @@ void mh_dessinerJeu() {
   
   // Monstre (Monster)
   mh_dessinerMonstre();
-  
-  afficherEcran();
+}
+
+// Dessiner le jeu (Draw the game)
+void mh_dessinerJeu() {
+  DESSINER_ECRAN {
+    mh_dessinerContenu();
+  }
 }
 
 // Fin du jeu (Game over)
@@ -446,20 +443,17 @@ void mh_finDuJeu() {
   
   melodieGameOver();
   
-  effacerEcran();
-  ecrireTexte(10, 0, pm_lireTexte(mh_txtGameOver), 2);
-  
-  ecrireTexteNombre(10, 22, "Score: ", mh_score, 1);
-  ecran.print(" Nv:");
-  ecran.print(mh_niveau);
-  
-  ecrireTexteNombre(10, 34, "Monstres: ", mh_monstresTues, 1);
-  ecran.print(" Boss: ");
-  ecran.print(mh_bossTues);
-  
-  ecrireTexte(5, 56, pm_lireTexte(mh_txtRecommencer), 1);
-  
-  afficherEcran();
+  DESSINER_ECRAN {
+    ecrireTexte(10, 0, pm_lireTexte(mh_txtGameOver), 2);
+    
+    sprintf(mh_statusBuffer, "Score:%d Nv:%d", mh_score, mh_niveau);
+    ecrireTexte(10, 22, mh_statusBuffer, 1);
+    
+    sprintf(mh_statusBuffer, "Monstres:%d Boss:%d", mh_monstresTues, mh_bossTues);
+    ecrireTexte(10, 34, mh_statusBuffer, 1);
+    
+    ecrireTexte(5, 56, pm_lireTexte(mh_txtRecommencer), 1);
+  }
 }
 
 // ==========================================================

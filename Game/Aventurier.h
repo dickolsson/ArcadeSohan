@@ -240,9 +240,8 @@ void av_dessinerBonhomme(int x, int y) {
   dessinerLigne(x + 2, y - 1, x + 4, y + 2);
 }
 
-void av_dessiner() {
-  effacerEcran();
-  
+// Dessiner le contenu du jeu (Draw game content) - appelé dans la boucle page
+void av_dessinerContenu() {
   // Score (Score)
   ecrireTexteNombre(0, 0, "Niv ", av_niveau, 1);
   
@@ -257,8 +256,12 @@ void av_dessiner() {
   
   // Joueur (Player)
   av_dessinerBonhomme(av_joueurX, av_joueurY);
-  
-  afficherEcran();
+}
+
+void av_dessiner() {
+  DESSINER_ECRAN {
+    av_dessinerContenu();
+  }
 }
 
 // ==========================================================
@@ -275,9 +278,9 @@ bool av_touchePorte() {
 
 void av_niveauTermine() {
   // Message simple (Simple message)
-  effacerEcran();
-  ecrireTexte(20, 20, "BRAVO!", 2);
-  afficherEcran();
+  DESSINER_ECRAN {
+    ecrireTexte(20, 20, "BRAVO!", 2);
+  }
   delay(1500);
   
   // Niveau suivant - maintenant infini!

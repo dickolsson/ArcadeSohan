@@ -43,10 +43,8 @@ void menu_ajouterJeu(const char* nom) {
   }
 }
 
-// Dessiner le menu (Draw the menu)
-void menu_dessiner() {
-  effacerEcran();
-  
+// Dessiner le contenu du menu (Draw menu content) - appelé dans la boucle page
+void menu_dessinerContenu() {
   // Titre du menu (Menu title)
   ecrireTexte(15, 0, "ARCADE SOHAN", 1);
   dessinerLigne(0, 10, 127, 10);
@@ -69,8 +67,13 @@ void menu_dessiner() {
   
   // Instructions en bas (Instructions at bottom)
   ecrireTexte(5, 55, "Haut/Bas + Bouton", 1);
-  
-  afficherEcran();
+}
+
+// Dessiner le menu (Draw the menu)
+void menu_dessiner() {
+  DESSINER_ECRAN {
+    menu_dessinerContenu();
+  }
 }
 
 // Mettre à jour le menu (Update the menu)
@@ -117,22 +120,20 @@ int menu_update() {
 
 // Afficher l'écran de démarrage (Show startup screen)
 void menu_afficherDemarrage() {
-  effacerEcran();
-  
-  // Titre principal (Main title)
-  ecrireTexte(22, 5, "ARCADE SOHAN", 1);
-  
-  // Décoration (Decoration)
-  dessinerLigne(0, 15, 127, 15);
-  
-  // Sous-titre (Subtitle)
-  ecrireTexte(25, 22, "Console de jeux", 1);
-  ecrireTexte(35, 32, "Arduino!", 1);
-  
-  // Instructions (Instructions)
-  ecrireTexte(5, 55, "Appuie pour jouer!", 1);
-  
-  afficherEcran();
+  DESSINER_ECRAN {
+    // Titre principal (Main title)
+    ecrireTexte(22, 5, "ARCADE SOHAN", 1);
+    
+    // Décoration (Decoration)
+    dessinerLigne(0, 15, 127, 15);
+    
+    // Sous-titre (Subtitle)
+    ecrireTexte(25, 22, "Console de jeux", 1);
+    ecrireTexte(35, 32, "Arduino!", 1);
+    
+    // Instructions (Instructions)
+    ecrireTexte(5, 55, "Appuie pour jouer!", 1);
+  }
   
   melodieStartup();
 }

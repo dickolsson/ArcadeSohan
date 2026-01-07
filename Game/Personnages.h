@@ -162,11 +162,8 @@ void dessinerPersonnage(int x, int y, int numeroPerso) {
 // ÉCRAN DE SÉLECTION (Selection screen)
 // ==========================================================
 
-// Afficher l'écran de sélection de personnage
-// (Show character selection screen)
-void afficherSelectionPersonnage() {
-  effacerEcran();
-  
+// Dessiner le contenu de sélection (Draw selection content)
+void dessinerSelectionContenu() {
   // Titre (Title)
   ecrireTexte(10, 0, "PERSONNAGES", 1);
   
@@ -195,8 +192,14 @@ void afficherSelectionPersonnage() {
   
   // Instructions (Instructions)
   ecrireTexte(0, 56, "<- Choisir ->  OK", 1);
-  
-  afficherEcran();
+}
+
+// Afficher l'écran de sélection de personnage
+// (Show character selection screen)
+void afficherSelectionPersonnage() {
+  DESSINER_ECRAN {
+    dessinerSelectionContenu();
+  }
 }
 
 #endif

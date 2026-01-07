@@ -1,3 +1,1 @@
-Adafruit GFX Library
-Adafruit SSD1306
-Adafruit BusIO
+U8g2

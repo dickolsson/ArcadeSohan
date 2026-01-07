@@ -105,9 +105,9 @@ void creerNiveau() {
 
 void niveauTermine() {
   // Simple message only!
-  effacerEcran();
-  ecrireTexte(20, 20, "BRAVO!", 2);
-  afficherEcran();
+  DESSINER_ECRAN {
+    ecrireTexte(20, 20, "BRAVO!", 2);
+  }
   delay(1500);
   
   // Next level
@@ -149,18 +149,20 @@ void gn_loopJeu() {
 
 ## Display Functions Available
 
-From `Display.h`:
+From `Display.h` - **See `.github/instructions/display.instructions.md` for full details!**
 
 | Function | Purpose |
-|----------|---------|
-| `effacerEcran()` | Clear screen buffer |
-| `afficherEcran()` | Show buffer on OLED |
-| `ecrireTexte(x, y, "text", size)` | Draw text (size 1-3) |
+|----------|--------|
+| `DESSINER_ECRAN { ... }` | **Main drawing macro** - wrap all drawing in this! |
+| `ecrireTexte(x, y, "text", size)` | Draw text (size 1-2) |
 | `ecrireTexteNombre(x, y, "text", num, size)` | Text + number |
+| `ecrireNombre(x, y, num, size)` | Number only |
+| `centrerX("text", size)` | Get X position for centered text |
 | `dessinerRectangle(x, y, w, h)` | Filled rectangle |
 | `dessinerContour(x, y, w, h)` | Rectangle outline |
 | `dessinerCercle(x, y, radius)` | Filled circle |
 | `dessinerLigne(x1, y1, x2, y2)` | Line |
+| `dessinerTriangle(x1,y1,x2,y2,x3,y3)` | Filled triangle |
 | `dessinerPixel(x, y)` | Single pixel |
 
 Screen size: **128 x 64 pixels**
