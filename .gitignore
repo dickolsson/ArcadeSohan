@@ -1,0 +1,16 @@
+# Build output
+build/
+
+# Arduino CLI cache
+.arduino15/
+
+# macOS
+.DS_Store
+
+# IDE files
+*.swp
+*.swo
+*~
+
+# VSCode (optional - uncomment if you want to ignore)
+# .vscode/
