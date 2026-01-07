@@ -99,3 +99,59 @@ connect with BUT3 and BUT4
 - Prioritize the ability to understand the code over efficiency of the code
 - Write inline comments in simple and clear French
 - Explain what libraries need to be configured in Arduino IDE 2.3.6.
+
+## 🎮 Project Structure - Multi-Game Arcade
+
+This project is organized as a **multi-game arcade console**. The system shows a
+menu where you select which game to play.
+
+### File Organization
+
+| File | Purpose |
+|------|---------|
+| `Game/Game.ino` | Main program - handles menu and game switching |
+| `Game/Display.h` | Reusable OLED screen functions |
+| `Game/Input.h` | Reusable joystick and button controls |
+| `Game/Melodies.h` | Reusable sound effects and melodies |
+| `Game/GameBase.h` | Game state definitions and constants |
+| `Game/Menu.h` | Game selection menu system |
+| `Game/MonsterHunter.h` | Monster Hunter game (first game) |
+
+### Reusable Modules
+
+When creating new games, use these existing modules:
+
+- **Display.h**: `effacerEcran()`, `afficherEcran()`, `ecrireTexte()`, `dessinerRectangle()`, etc.
+- **Input.h**: `lireJoystick()`, `boutonJustePresse()`, `joystickHaut()`, `joystickBas()`, etc.
+- **Melodies.h**: `melodieStartup()`, `melodieGameOver()`, `melodieTir()`, `melodieVictoireBoss()`, etc.
+
+### How To Add A New Game
+
+1. **Create a new file** like `NewGame.h` in the `Game/` folder
+2. **Prefix all variables and functions** with a short code (e.g., `ng_` for "New Game")
+3. **Implement required functions:**
+   - `ng_setupJeu()` - Initialize the game
+   - `ng_loopJeu()` - Main game loop (called every frame)
+   - `ng_resetJeu()` - Reset game to initial state
+   - `ng_getEtatJeu()` - Return current game state
+4. **Register in Game.ino:**
+   - Add `#include "NewGame.h"` at the top
+   - Add `menu_ajouterJeu("Game Name");` in `setup()`
+   - Add handling in `lancerJeu()` and `executerJeu()` functions
+
+### Game States
+
+Games use these states defined in `GameBase.h`:
+
+- `ETAT_EN_COURS` (0) - Game is running
+- `ETAT_PAUSE` (1) - Game is paused
+- `ETAT_TERMINE` (2) - Game over
+- `ETAT_QUITTER` (3) - Return to menu
+
+### Naming Conventions
+
+- All game variables/functions use a **prefix** to avoid conflicts:
+  - Monster Hunter: `mh_` (e.g., `mh_joueurX`, `mh_loopJeu()`)
+  - Menu: `menu_` (e.g., `menu_dessiner()`)
+- French variable names for educational clarity
+- Comments in French with English translations in parentheses
