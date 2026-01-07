@@ -10,6 +10,8 @@
 #include "Display.h"
 #include "Input.h"
 #include "Melodies.h"
+#include "ProgMem.h"    // Pour stocker niveaux en Flash!
+#include "Procedural.h" // Pour niveaux infinis!
 
 // ==========================================================
 // INFORMATIONS DU JEU (Game information)
@@ -56,6 +58,56 @@ int av_etoiles = 0;
 int av_etatJeu = ETAT_EN_COURS;
 
 // ==========================================================
+// DONNÉES NIVEAUX EN PROGMEM (Level data in PROGMEM)
+// ==========================================================
+// Ces données sont stockées en Flash (32KB) pas en RAM (2KB)!
+// Économie: ~72 octets de RAM sauvés!
+// (This data is stored in Flash, not RAM! Saves ~72 bytes!)
+
+// Format: x, y, largeur pour chaque plateforme
+// (Format: x, y, width for each platform)
+
+// Niveau 1 - 5 plateformes + porte
+NIVEAU_PROGMEM(av_niv1_plat, {
+  0, 56, 40,      // Départ (start)
+  45, 46, 30,
+  80, 38, 30,
+  50, 28, 35,
+  95, 18, 33      // Finale
+});
+const uint8_t av_niv1_porte[] PROGMEM = { 110, 3 };
+
+// Niveau 2
+NIVEAU_PROGMEM(av_niv2_plat, {
+  0, 56, 40,
+  35, 46, 25,
+  65, 36, 25,
+  95, 26, 33,
+  60, 16, 35
+});
+const uint8_t av_niv2_porte[] PROGMEM = { 75, 1 };
+
+// Niveau 3
+NIVEAU_PROGMEM(av_niv3_plat, {
+  0, 56, 40,
+  30, 44, 22,
+  60, 54, 22,
+  90, 42, 22,
+  55, 28, 25
+});
+const uint8_t av_niv3_porte[] PROGMEM = { 80, 13 };
+
+// Niveau 4+
+NIVEAU_PROGMEM(av_niv4_plat, {
+  0, 56, 40,
+  28, 48, 18,
+  55, 38, 18,
+  82, 48, 18,
+  105, 36, 23
+});
+const uint8_t av_niv4_porte[] PROGMEM = { 115, 21 };
+
+// ==========================================================
 // CRÉER NIVEAU (Create level)
 // ==========================================================
 
@@ -63,39 +115,31 @@ void av_creerNiveau() {
   // Toujours 5 plateformes (Always 5 platforms)
   av_nbPlat = 5;
   
-  // Plateforme de depart (Starting platform)
-  av_plat[0][0] = 0;   av_plat[0][1] = 56; av_plat[0][2] = 40;
+  // Niveaux 1-4: chargés depuis PROGMEM (hand-crafted)
+  // Niveaux 5+: générés procéduralement (infinite!)
   
-  // Les autres plateformes changent selon le niveau
-  // (Other platforms change based on level)
   if (av_niveau == 1) {
-    av_plat[1][0] = 45;  av_plat[1][1] = 46; av_plat[1][2] = 30;
-    av_plat[2][0] = 80;  av_plat[2][1] = 38; av_plat[2][2] = 30;
-    av_plat[3][0] = 50;  av_plat[3][1] = 28; av_plat[3][2] = 35;
-    av_plat[4][0] = 95;  av_plat[4][1] = 18; av_plat[4][2] = 33;
-    av_porteX = 110; av_porteY = 3;
+    pm_chargerNiveau(av_niv1_plat, av_plat, 5);
+    pm_chargerPorte(av_niv1_porte, &av_porteX, &av_porteY);
   }
   else if (av_niveau == 2) {
-    av_plat[1][0] = 35;  av_plat[1][1] = 46; av_plat[1][2] = 25;
-    av_plat[2][0] = 65;  av_plat[2][1] = 36; av_plat[2][2] = 25;
-    av_plat[3][0] = 95;  av_plat[3][1] = 26; av_plat[3][2] = 33;
-    av_plat[4][0] = 60;  av_plat[4][1] = 16; av_plat[4][2] = 35;
-    av_porteX = 75; av_porteY = 1;
+    pm_chargerNiveau(av_niv2_plat, av_plat, 5);
+    pm_chargerPorte(av_niv2_porte, &av_porteX, &av_porteY);
   }
   else if (av_niveau == 3) {
-    av_plat[1][0] = 30;  av_plat[1][1] = 44; av_plat[1][2] = 22;
-    av_plat[2][0] = 60;  av_plat[2][1] = 54; av_plat[2][2] = 22;
-    av_plat[3][0] = 90;  av_plat[3][1] = 42; av_plat[3][2] = 22;
-    av_plat[4][0] = 55;  av_plat[4][1] = 28; av_plat[4][2] = 25;
-    av_porteX = 80; av_porteY = 13;
+    pm_chargerNiveau(av_niv3_plat, av_plat, 5);
+    pm_chargerPorte(av_niv3_porte, &av_porteX, &av_porteY);
+  }
+  else if (av_niveau == 4) {
+    pm_chargerNiveau(av_niv4_plat, av_plat, 5);
+    pm_chargerPorte(av_niv4_porte, &av_porteX, &av_porteY);
   }
   else {
-    // Niveau 4+ (Level 4+)
-    av_plat[1][0] = 28;  av_plat[1][1] = 48; av_plat[1][2] = 18;
-    av_plat[2][0] = 55;  av_plat[2][1] = 38; av_plat[2][2] = 18;
-    av_plat[3][0] = 82;  av_plat[3][1] = 48; av_plat[3][2] = 18;
-    av_plat[4][0] = 105; av_plat[4][1] = 36; av_plat[4][2] = 23;
-    av_porteX = 115; av_porteY = 21;
+    // Niveau 5+: génération procédurale!
+    // (Level 5+: procedural generation!)
+    int difficulte = proc_calculerDifficulte(av_niveau);
+    proc_genererPlateformes(av_niveau, av_plat, 5, difficulte);
+    proc_genererPorte(av_plat, 5, &av_porteX, &av_porteY);
   }
 }
 
@@ -236,11 +280,11 @@ void av_niveauTermine() {
   afficherEcran();
   delay(1500);
   
-  // Niveau suivant (Next level)
+  // Niveau suivant - maintenant infini!
+  // (Next level - now infinite!)
   av_niveau = av_niveau + 1;
-  if (av_niveau > 4) {
-    av_niveau = 1;
-  }
+  // Plus de limite! Les niveaux 5+ sont générés automatiquement
+  // (No more limit! Levels 5+ are generated automatically)
   
   // Reset joueur (Reset player)
   av_joueurX = 20;

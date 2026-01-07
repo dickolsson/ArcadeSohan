@@ -76,6 +76,8 @@ Game/
 ├── Input.h           # Joystick and button controls
 ├── Melodies.h        # Sound effects
 ├── Menu.h            # Game selection menu
+├── ProgMem.h         # 💾 Store data in Flash (CRITICAL!)
+├── Procedural.h      # 🎲 Procedural level generation
 ├── MonsterHunter.h   # Game 1: Monster Hunter
 └── Aventurier.h      # Game 2: Platform adventure
 ```
@@ -89,6 +91,8 @@ When creating new games, use these existing modules:
 | **Display.h** | `effacerEcran()`, `afficherEcran()`, `ecrireTexte()`, `dessinerRectangle()`, `dessinerCercle()`, `dessinerLigne()` |
 | **Input.h** | `lireJoystick()`, `boutonJustePresse()`, `joystickHaut()`, `joystickBas()`, `joystickGauche()`, `joystickDroite()` |
 | **Melodies.h** | `melodieStartup()`, `melodieGameOver()`, `melodieTir()` |
+| **ProgMem.h** | `NIVEAU_PROGMEM()`, `CONFIG_PROGMEM()`, `TEXTE_PROGMEM()`, `pm_charger3Colonnes()`, `pm_lireTexte()` |
+| **Procedural.h** | `proc_genererPlateformes()`, `proc_genererPorte()`, `proc_calculerDifficulte()` |
 
 ### Game States (defined in GameBase.h)
 
@@ -225,6 +229,155 @@ void niveauTermine() {
   creerNiveau();
 }
 ```
+
+---
+
+## 💾 CRITICAL: Use ProgMem.h to Save RAM!
+
+The `ProgMem.h` module stores data in **Flash memory (32KB)** instead of **RAM (2KB)**. This is essential for games with multiple levels, configuration data, or text strings.
+
+**Always include ProgMem.h in new games:**
+```cpp
+#include "ProgMem.h"
+```
+
+### When to Use PROGMEM
+
+| Data Type | Use PROGMEM? | RAM Saved |
+|-----------|--------------|-----------|
+| Level layouts (platforms, enemies) | ✅ YES | ~15-20 bytes per level |
+| Per-level configuration (speed, HP) | ✅ YES | ~10-30 bytes |
+| Text strings (messages, titles) | ✅ YES | ~10 bytes per string |
+| Player position, score | ❌ NO | Changes during gameplay |
+| Current level data (active copy) | ❌ NO | Needs to be in RAM |
+
+### Defining Data in PROGMEM
+
+```cpp
+// Byte arrays (values 0-255)
+DONNEES_BYTE(gn_speeds, { 1, 2, 3, 4, 5 });
+CONFIG_PROGMEM(gn_bossHP, { 3, 4, 5, 6, 7 });
+
+// Platform levels: x, y, width per platform
+NIVEAU_PROGMEM(gn_niveau1, {
+  0, 56, 40,    // Platform 1
+  45, 46, 30,   // Platform 2
+  80, 38, 25    // Platform 3
+});
+
+// Text strings
+TEXTE_PROGMEM(gn_txtGameOver, "GAME OVER");
+TEXTE_PROGMEM(gn_txtBravo, "BRAVO!");
+```
+
+### Reading PROGMEM Data
+
+#### Single Values (Configuration)
+
+```cpp
+// Read config at index (0-based)
+int vitesse = pm_lireConfig(gn_speeds, niveau - 1);
+
+// Read with default if index out of bounds
+int bossHP = pm_lireConfigOuDefaut(gn_bossHP, niveau - 1, 5, 10);
+//                                  array      index     size default
+```
+
+#### Loading Arrays into RAM
+
+```cpp
+// Destination array in RAM
+int gn_plat[5][3];
+
+// Load platforms from PROGMEM
+pm_charger3Colonnes(gn_niveau1, gn_plat, 3);  // 3 platforms
+
+// For [n][2] arrays (x, y positions)
+pm_charger2Colonnes(gn_positions, gn_pos, 4);
+
+// Load a pair of values (door position)
+int porteX, porteY;
+pm_chargerPaire(gn_porte1, &porteX, &porteY);
+```
+
+#### Reading Text
+
+```cpp
+// Use pm_lireTexte() to read PROGMEM text
+ecrireTexte(10, 10, pm_lireTexte(gn_txtGameOver), 2);
+ecrireTexte(20, 30, pm_lireTexte(gn_txtBravo), 1);
+```
+
+### Complete PROGMEM Game Pattern
+
+```cpp
+#include "ProgMem.h"
+
+// ===== PROGMEM DATA (in Flash) =====
+NIVEAU_PROGMEM(gn_niv1, { 0,56,40, 45,46,30, 80,38,25 });
+NIVEAU_PROGMEM(gn_niv2, { 0,56,40, 35,44,25, 70,32,30 });
+CONFIG_PROGMEM(gn_vitesse, { 1, 2, 3, 4, 5 });
+TEXTE_PROGMEM(gn_txtVictoire, "BRAVO!");
+
+// ===== RAM VARIABLES (active data) =====
+int gn_plat[3][3];  // Only current level in RAM
+int gn_niveau = 1;
+
+// ===== LOAD LEVEL =====
+void gn_creerNiveau() {
+  if (gn_niveau == 1) {
+    pm_charger3Colonnes(gn_niv1, gn_plat, 3);
+  } else if (gn_niveau == 2) {
+    pm_charger3Colonnes(gn_niv2, gn_plat, 3);
+  }
+}
+
+// ===== USE CONFIG =====
+void gn_updateVitesse() {
+  int v = pm_lireConfigOuDefaut(gn_vitesse, gn_niveau-1, 5, 5);
+  // Use v...
+}
+```
+
+### ProgMem.h Quick Reference
+
+| Macro/Function | Purpose |
+|----------------|---------|
+| `DONNEES_BYTE(name, {...})` | Define byte array in Flash |
+| `CONFIG_PROGMEM(name, {...})` | Alias for config data |
+| `NIVEAU_PROGMEM(name, {...})` | Alias for level data |
+| `TEXTE_PROGMEM(name, "text")` | Define text string in Flash |
+| `pm_lireConfig(arr, idx)` | Read single byte at index |
+| `pm_lireConfigOuDefaut(arr, idx, size, def)` | Read with fallback |
+| `pm_charger2Colonnes(src, dest, n)` | Load [n][2] array |
+| `pm_charger3Colonnes(src, dest, n)` | Load [n][3] array |
+| `pm_charger4Colonnes(src, dest, n)` | Load [n][4] array |
+| `pm_chargerPaire(src, &a, &b)` | Load two values |
+| `pm_lireTexte(txtProgmem)` | Read text to buffer |
+
+---
+
+## 🎲 Procedural Generation with Procedural.h
+
+For **infinite levels** without memory cost, use `Procedural.h`:
+
+```cpp
+#include "Procedural.h"
+
+void gn_creerNiveau() {
+  if (gn_niveau <= 4) {
+    // Hand-crafted levels from PROGMEM
+    pm_charger3Colonnes(gn_niveaux[gn_niveau], gn_plat, 5);
+  } else {
+    // Procedural generation for level 5+
+    int diff = proc_calculerDifficulte(gn_niveau);
+    proc_genererPlateformes(gn_niveau, gn_plat, 5, diff);
+    proc_genererPorte(gn_plat, 5, &porteX, &porteY);
+  }
+}
+```
+
+Same seed = same level every time!
 
 ---
 

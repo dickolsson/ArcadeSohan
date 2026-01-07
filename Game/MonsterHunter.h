@@ -13,6 +13,7 @@
 #include "Display.h"
 #include "Input.h"
 #include "Melodies.h"
+#include "ProgMem.h"  // Pour stocker config en Flash!
 
 // ==========================================================
 // INFORMATIONS DU JEU (Game information)
@@ -22,6 +23,89 @@ InfoJeu infoMonsterHunter = {
   "Monster Hunter",      // Nom (Name)
   "Chasse le monstre!"   // Description
 };
+
+// ==========================================================
+// CONFIGURATION PAR NIVEAU EN PROGMEM
+// (Per-level configuration in PROGMEM)
+// ==========================================================
+// Ces données sont en Flash, pas en RAM!
+// Économie: ~30 octets de RAM
+// (This data is in Flash, not RAM! Saves ~30 bytes)
+
+// Vitesse de base du monstre par niveau (index 0 = niveau 1)
+// (Monster base speed per level)
+CONFIG_PROGMEM(mh_configVitesse, {
+  1,   // Niveau 1: lent
+  2,   // Niveau 2
+  4,   // Niveau 3
+  5,   // Niveau 4
+  6,   // Niveau 5
+  7,   // Niveau 6
+  8,   // Niveau 7
+  9,   // Niveau 8
+  10,  // Niveau 9
+  11   // Niveau 10+
+});
+#define MH_CONFIG_VITESSE_TAILLE 10
+
+// Vie du boss par niveau
+// (Boss HP per level)
+CONFIG_PROGMEM(mh_configVieBoss, {
+  3,   // Niveau 1: facile
+  4,   // Niveau 2
+  5,   // Niveau 3
+  5,   // Niveau 4
+  6,   // Niveau 5
+  6,   // Niveau 6
+  7,   // Niveau 7
+  8,   // Niveau 8
+  9,   // Niveau 9
+  10   // Niveau 10+
+});
+#define MH_CONFIG_VIE_BOSS_TAILLE 10
+
+// Points requis pour passer au niveau suivant
+// (Points required for next level)
+CONFIG_PROGMEM(mh_configPoints, {
+  100,  // Niveau 1 -> 2
+  150,  // Niveau 2 -> 3
+  200,  // Niveau 3 -> 4
+  250,  // Niveau 4+
+});
+#define MH_CONFIG_POINTS_TAILLE 4
+
+// Textes du jeu en PROGMEM (Game texts in PROGMEM)
+// Économie: ~80 octets de RAM
+TEXTE_PROGMEM(mh_txtTitre, "MONSTER HUNTER!");
+TEXTE_PROGMEM(mh_txtControles1, "Bouge = direction");
+TEXTE_PROGMEM(mh_txtControles2, "Bouton = TIRE!");
+TEXTE_PROGMEM(mh_txtControles3, "Mange pour recharger!");
+TEXTE_PROGMEM(mh_txtGameOver, "GAME OVER");
+TEXTE_PROGMEM(mh_txtBoss, "!! BOSS !!");
+TEXTE_PROGMEM(mh_txtTire5Fois, "Tire 5 fois!");
+TEXTE_PROGMEM(mh_txtRecommencer, "Bouton = Recommencer");
+
+// ==========================================================
+// FONCTIONS DE CONFIGURATION (Configuration functions)
+// ==========================================================
+
+// Obtenir la vitesse de base pour un niveau
+int mh_getVitesseNiveau(int niveau) {
+  return pm_lireConfigOuDefaut(mh_configVitesse, niveau - 1, 
+                                MH_CONFIG_VITESSE_TAILLE, 11);
+}
+
+// Obtenir la vie du boss pour un niveau
+int mh_getVieBossNiveau(int niveau) {
+  return pm_lireConfigOuDefaut(mh_configVieBoss, niveau - 1,
+                                MH_CONFIG_VIE_BOSS_TAILLE, 10);
+}
+
+// Obtenir les points requis pour passer un niveau
+int mh_getPointsNiveau(int niveau) {
+  return pm_lireConfigOuDefaut(mh_configPoints, niveau - 1,
+                                MH_CONFIG_POINTS_TAILLE, 250);
+}
 
 // ==========================================================
 // VARIABLES DU JEU (Game variables)
@@ -73,7 +157,7 @@ int mh_vitesseMonstre = 1;
 int mh_vitesseMonstreBase = 1;
 int mh_vitesseMonstreMax = 8;
 int mh_bonusVitesseNourriture = 2;
-int mh_bonusVitesseNiveau = 3;
+// Note: mh_bonusVitesseNiveau est maintenant dans PROGMEM!
 
 // Compteur monstre (Monster counter)
 int mh_compteurMonstre = 0;
@@ -82,7 +166,7 @@ int mh_delaiMonstre = 3;
 // Score et niveau (Score and level)
 int mh_score = 0;
 int mh_niveau = 1;
-int mh_pointsParNiveau = 250;
+// Note: mh_pointsParNiveau est maintenant dans PROGMEM!
 int mh_monstresTues = 0;
 int mh_bossTues = 0;
 
@@ -216,17 +300,18 @@ bool mh_verifierCollisionTirMonstre() {
 // Activer le mode boss (Activate boss mode)
 void mh_activerBoss() {
   mh_estBoss = true;
-  mh_vieBoss = mh_vieMaxBoss;
+  mh_vieBoss = mh_getVieBossNiveau(mh_niveau);  // Vie depuis PROGMEM!
+  mh_vieMaxBoss = mh_vieBoss;
   mh_tailleMonstreActuelle = mh_tailleBoss;
   mh_vitesseMonstre = mh_vitesseMonstreBase + mh_bonusVitesseBoss;
   mh_placerMonstre();
   
   // Afficher alerte BOSS (Show BOSS alert)
   effacerEcran();
-  ecrireTexte(25, 10, "!! BOSS !!", 2);
+  ecrireTexte(25, 10, pm_lireTexte(mh_txtBoss), 2);
   ecrireTexteNombre(15, 35, "Niveau ", mh_niveau, 1);
   ecran.print(" atteint!");
-  ecrireTexte(15, 48, "Tire 5 fois!", 1);
+  ecrireTexte(15, 48, pm_lireTexte(mh_txtTire5Fois), 1);
   afficherEcran();
   
   melodieAlerteBoss();
@@ -235,11 +320,23 @@ void mh_activerBoss() {
 
 // Vérifier et mettre à jour le niveau (Check and update level)
 void mh_verifierNiveau() {
-  int nouveauNiveau = (mh_score / mh_pointsParNiveau) + 1;
+  // Calculer le niveau basé sur les points (PROGMEM config)
+  int pointsRequis = 0;
+  int nouveauNiveau = 1;
+  
+  for (int i = 0; i < 20; i++) {
+    pointsRequis = pointsRequis + mh_getPointsNiveau(i + 1);
+    if (mh_score >= pointsRequis) {
+      nouveauNiveau = i + 2;
+    } else {
+      break;
+    }
+  }
   
   if (nouveauNiveau > mh_niveau) {
     mh_niveau = nouveauNiveau;
-    mh_vitesseMonstre = mh_vitesseMonstre + mh_bonusVitesseNiveau;
+    // Vitesse depuis PROGMEM!
+    mh_vitesseMonstre = mh_getVitesseNiveau(mh_niveau);
     mh_vitesseMonstreBase = mh_vitesseMonstre;
     
     melodieNiveauSup();
@@ -350,7 +447,7 @@ void mh_finDuJeu() {
   melodieGameOver();
   
   effacerEcran();
-  ecrireTexte(10, 0, "GAME OVER", 2);
+  ecrireTexte(10, 0, pm_lireTexte(mh_txtGameOver), 2);
   
   ecrireTexteNombre(10, 22, "Score: ", mh_score, 1);
   ecran.print(" Nv:");
@@ -360,7 +457,7 @@ void mh_finDuJeu() {
   ecran.print(" Boss: ");
   ecran.print(mh_bossTues);
   
-  ecrireTexte(5, 56, "Bouton = Recommencer", 1);
+  ecrireTexte(5, 56, pm_lireTexte(mh_txtRecommencer), 1);
   
   afficherEcran();
 }
@@ -373,10 +470,10 @@ void mh_finDuJeu() {
 void mh_setupJeu() {
   // Afficher instructions (Show instructions)
   effacerEcran();
-  ecrireTexte(20, 10, "MONSTER HUNTER!", 1);
-  ecrireTexte(10, 25, "Bouge = direction", 1);
-  ecrireTexte(10, 37, "Bouton = TIRE!", 1);
-  ecrireTexte(10, 52, "Mange pour recharger!", 1);
+  ecrireTexte(20, 10, pm_lireTexte(mh_txtTitre), 1);
+  ecrireTexte(10, 25, pm_lireTexte(mh_txtControles1), 1);
+  ecrireTexte(10, 37, pm_lireTexte(mh_txtControles2), 1);
+  ecrireTexte(10, 52, pm_lireTexte(mh_txtControles3), 1);
   afficherEcran();
   
   melodieStartup();
@@ -507,7 +604,8 @@ void mh_loopJeu() {
         melodieMonstreTouche();
         mh_verifierNiveau();
         mh_placerMonstre();
-        mh_vitesseMonstre = 1 + (mh_niveau - 1) * mh_bonusVitesseNiveau;
+        // Vitesse depuis PROGMEM!
+        mh_vitesseMonstre = mh_getVitesseNiveau(mh_niveau);
         mh_vitesseMonstreBase = mh_vitesseMonstre;
       }
     }

@@ -192,3 +192,102 @@ if (touchePlateforme()) {
   auSol = true;
 }
 ```
+
+## PROGMEM - Store Data in Flash Memory
+
+For games with multiple levels, use `ProgMem.h` to store level data in Flash (32KB) instead of RAM (2KB). This can save ~100 bytes of RAM!
+
+### Include the module
+
+```cpp
+#include "ProgMem.h"
+```
+
+### Define levels in PROGMEM
+
+```cpp
+// Format: x, y, width for each platform
+NIVEAU_PROGMEM(gn_niveau1_plat, {
+  0, 56, 40,    // Platform 1
+  45, 46, 30,   // Platform 2
+  80, 38, 30    // Platform 3
+});
+
+// Door/objective position
+const uint8_t gn_niveau1_porte[] PROGMEM = { 110, 15 };
+```
+
+### Load into RAM when needed
+
+```cpp
+void gn_creerNiveau() {
+  if (niveau == 1) {
+    pm_chargerNiveau(gn_niveau1_plat, gn_plat, 3);  // 3 platforms
+    pm_chargerPorte(gn_niveau1_porte, &porteX, &porteY);
+  }
+}
+```
+
+### Available PROGMEM functions
+
+| Function | Purpose |
+|----------|---------|
+| `NIVEAU_PROGMEM(name, {...})` | Define level data in Flash |
+| `pm_chargerNiveau(src, dest, n)` | Load n platforms to RAM array |
+| `pm_chargerPorte(src, &x, &y)` | Load door position |
+| `TEXTE_PROGMEM(name, "text")` | Store text in Flash |
+| `pm_lireTexte(textProgmem)` | Read text to temp buffer |
+
+## Procedural Generation - Infinite Levels
+
+For games with unlimited levels, use `Procedural.h` to generate levels from a seed. Same seed = same level!
+
+### Include the module
+
+```cpp
+#include "Procedural.h"
+```
+
+### Generate platforms automatically
+
+```cpp
+void gn_creerNiveau() {
+  // Calculate difficulty (1=easy, 2=medium, 3=hard)
+  int diff = proc_calculerDifficulte(gn_niveau);
+  
+  // Generate 5 platforms
+  proc_genererPlateformes(gn_niveau, gn_plat, 5, diff);
+  
+  // Place door on last platform
+  proc_genererPorte(gn_plat, 5, &gn_porteX, &gn_porteY);
+}
+```
+
+### Available procedural functions
+
+| Function | Purpose |
+|----------|---------|
+| `proc_init(seed)` | Initialize random generator |
+| `proc_random(min, max)` | Get random number in range |
+| `proc_genererPlateformes(level, dest, n, diff)` | Generate n playable platforms |
+| `proc_genererPorte(plat, n, &x, &y)` | Place door on last platform |
+| `proc_genererEnnemis(level, plat, n, dest, count)` | Generate enemies on platforms |
+| `proc_genererCollectibles(level, plat, n, dest, count)` | Generate collectible items |
+| `proc_calculerDifficulte(level)` | Returns 1-3 based on level number |
+
+### Combining PROGMEM + Procedural
+
+Best practice: hand-craft early levels, generate later ones:
+
+```cpp
+void gn_creerNiveau() {
+  if (gn_niveau <= 4) {
+    // Levels 1-4: hand-crafted from PROGMEM
+    pm_chargerNiveau(gn_niveauData[gn_niveau], gn_plat, 5);
+  } else {
+    // Levels 5+: procedurally generated
+    int diff = proc_calculerDifficulte(gn_niveau);
+    proc_genererPlateformes(gn_niveau, gn_plat, 5, diff);
+  }
+}
+```
