@@ -1,157 +1,261 @@
+# 🎮 Arduino Arcade Console - Copilot Instructions
+
 I am a seasoned software expert teaching a 10-year old boy about electronics and
 how to code, using an Arduino kit.
 
-## Important Information About The Boy
+---
 
-- He is French
-- He is 10-years old
-- His level of English is **very** basic
-- He is starting from **zero skills** about programming
+## 🇫🇷 CRITICAL: Always Respond in French!
 
-## Learning Path
+**The boy's English is very basic. You MUST:**
+- **Always respond in French** during conversations
+- Use simple, clear French that a 10-year-old can understand
+- Technical terms can stay in English (Arduino, loop, setup, etc.)
+- Keep sentences short and easy to follow
 
-- Respond in English
-- When appropriate, briefly translate complex concepts in French using parentheses
-- Use fun and engaging emojis in headings and where else appropriate
-- Lay out the solution in a clear, step-by-step guide
-- Render a breadboard diagram with components AND wires
-- Also render a sequential diagram from each pin on the Arduino
+---
 
-## What Components To Use
+## 👦 About The Student
 
-- Only use components from the component list attached
-- The common rails for power and ground should be used
-- Black and blue wires are for GND only
+| Attribute | Value |
+|-----------|-------|
+| Age | 10 years old |
+| Language | French |
+| English level | Very basic |
+| Programming experience | Zero - complete beginner |
 
-## The Breadboard Table
+---
 
-The breadboard diagram is a simple table view from atop of how to place
-components **and** wires on the breadboard.
+## 📚 Teaching Approach
 
-**CRITICAL:** Think extra long before rendering the breadboard, correctness is
-critical! For example, you must understand that horizontal rows are connected
-from A to .
+- **Respond in French** (critical!)
+- Use fun and engaging emojis in headings
+- Lay out solutions in clear, step-by-step guides
+- Write extremely basic, easy-to-follow code
+- Prioritize readability over efficiency
+- Write inline comments in simple French
+- Explain required Arduino IDE libraries
 
-### How To Render The Table
+---
 
-- Provide a top-view breadboard diagram
-- Always format the breadboard as a Markdown table
-- Each cell in the table represents a pinhole
-- The column headers must be: A to E, ❌, F to J, ➕, ➖
-- ➕ and ➖ indicates the common rails for power and ground 
-- ❌ indicates the center gap between E and F
-- The horizontal rows are **connected** from columns A to E, and from column F to J
-- The horizontal rows are **not connected** between column E and F
-- Wire placements must always be indicated
+## 📝 Git Commits - Conventional Commits
 
-Orientation of the table:
+Use the **Conventional Commits** specification for all git commits:
 
-- Upper left cell: A1
-- Upper right cell: J1
-- Lower right cell: J63
-- Lower left cell: A63
+```
+<type>: <short description>
+```
 
-### How To Render Wires
+| Type | When to use |
+|------|-------------|
+| `feat` | New feature (new game, new function) |
+| `fix` | Bug fix |
+| `docs` | Documentation changes |
+| `refactor` | Code restructuring (no new features) |
+| `style` | Formatting, comments |
+| `chore` | Build, config, maintenance |
 
-Always assume that the common rail for power is connected to 5V, and common rail
-for ground is connected to GND.
+**Examples:**
+- `feat: add Aventurier platform game`
+- `fix: reduce RAM usage in level transitions`
+- `docs: update copilot instructions for multi-game structure`
 
-**CRITICAL:** Always use these colored emojis when rendering wires:
-
-- **Power wire:** "🟥1" placed to the common power rail, "🟥2" placed on the breadboard
-- **Ground wire:** "⬛️1" placed on the common ground rail, "⬛️2" placed on the breadboard
-- **Analog pin wires:** 🟡, 🟢, 🔵, 🟣, or other colored circles
-- **Digital pin wires:** 🟨, 🟩, 🟦, 🟪. or other colored squares
-
-## How To Render Components
-
-**CRITICAL:** Always use these 3-4 ASCII characters when rendering components:
-
-- **LED lights:** "LED+" and "LED-" for anode and cathode
-- **Push buttons:** "BUT1", "BUT2", "BUT3" and "BUT4" for each of the 4 pins on a single button
-- **200 ohm resistors:** "220" for both start/end placement
-- **10K ohm resistors:** "10K" for both start/end placement
-
-## How To Place Buttons
-
-- Always place buttons over the center gap
-- When un-pressed
-  - BUT1 and BUT2 are connected
-  - BUT3 and BUT4 are connected
-- When pressed
-  - BUT1 and BUT3 connects
-  - BUT2 and BUT4 connects
-
-Example placement at the top of the board:
-
-- BUT1 in cell E1
-- BUT2 in cell F1
-- BUT3 in cell E3
-- BUT4 in cell F3
-
-**CRITICAL:** Given this example, when connecting components the button, they
-must be placed on **row 1** to connect with BUT1 and BUT2, or **row 3** to
-connect with BUT3 and BUT4
-
-## How To Code
-
-- Write extremely basic and easy-to-follow code
-- Prioritize the ability to understand the code over efficiency of the code
-- Write inline comments in simple and clear French
-- Explain what libraries need to be configured in Arduino IDE 2.3.6.
+---
 
 ## 🎮 Project Structure - Multi-Game Arcade
 
-This project is organized as a **multi-game arcade console**. The system shows a
-menu where you select which game to play.
+This project is a **multi-game arcade console** with a menu system.
 
-### File Organization
+### Architecture Overview
 
-| File | Purpose |
-|------|---------|
-| `Game/Game.ino` | Main program - handles menu and game switching |
-| `Game/Display.h` | Reusable OLED screen functions |
-| `Game/Input.h` | Reusable joystick and button controls |
-| `Game/Melodies.h` | Reusable sound effects and melodies |
-| `Game/GameBase.h` | Game state definitions and constants |
-| `Game/Menu.h` | Game selection menu system |
-| `Game/MonsterHunter.h` | Monster Hunter game (first game) |
+```
+Game/
+├── Game.ino          # Main program - menu & game switching
+├── GameBase.h        # Game states and constants
+├── Display.h         # OLED screen functions
+├── Input.h           # Joystick and button controls
+├── Melodies.h        # Sound effects
+├── Menu.h            # Game selection menu
+├── MonsterHunter.h   # Game 1: Monster Hunter
+└── Aventurier.h      # Game 2: Platform adventure
+```
 
 ### Reusable Modules
 
 When creating new games, use these existing modules:
 
-- **Display.h**: `effacerEcran()`, `afficherEcran()`, `ecrireTexte()`, `dessinerRectangle()`, etc.
-- **Input.h**: `lireJoystick()`, `boutonJustePresse()`, `joystickHaut()`, `joystickBas()`, etc.
-- **Melodies.h**: `melodieStartup()`, `melodieGameOver()`, `melodieTir()`, `melodieVictoireBoss()`, etc.
+| Module | Key Functions |
+|--------|---------------|
+| **Display.h** | `effacerEcran()`, `afficherEcran()`, `ecrireTexte()`, `dessinerRectangle()`, `dessinerCercle()`, `dessinerLigne()` |
+| **Input.h** | `lireJoystick()`, `boutonJustePresse()`, `joystickHaut()`, `joystickBas()`, `joystickGauche()`, `joystickDroite()` |
+| **Melodies.h** | `melodieStartup()`, `melodieGameOver()`, `melodieTir()` |
 
-### How To Add A New Game
+### Game States (defined in GameBase.h)
 
-1. **Create a new file** like `NewGame.h` in the `Game/` folder
-2. **Prefix all variables and functions** with a short code (e.g., `ng_` for "New Game")
-3. **Implement required functions:**
-   - `ng_setupJeu()` - Initialize the game
-   - `ng_loopJeu()` - Main game loop (called every frame)
-   - `ng_resetJeu()` - Reset game to initial state
-   - `ng_getEtatJeu()` - Return current game state
-4. **Register in Game.ino:**
-   - Add `#include "NewGame.h"` at the top
-   - Add `menu_ajouterJeu("Game Name");` in `setup()`
-   - Add handling in `lancerJeu()` and `executerJeu()` functions
+| State | Value | Meaning |
+|-------|-------|---------|
+| `ETAT_EN_COURS` | 0 | Game is running |
+| `ETAT_PAUSE` | 1 | Game is paused |
+| `ETAT_TERMINE` | 2 | Game over |
+| `ETAT_QUITTER` | 3 | Return to menu |
 
-### Game States
+---
 
-Games use these states defined in `GameBase.h`:
+## 🆕 How To Add A New Game
 
-- `ETAT_EN_COURS` (0) - Game is running
-- `ETAT_PAUSE` (1) - Game is paused
-- `ETAT_TERMINE` (2) - Game over
-- `ETAT_QUITTER` (3) - Return to menu
+### Step 1: Create the game file
 
-### Naming Conventions
+Create `NewGame.h` in the `Game/` folder with this structure:
 
-- All game variables/functions use a **prefix** to avoid conflicts:
-  - Monster Hunter: `mh_` (e.g., `mh_joueurX`, `mh_loopJeu()`)
-  - Menu: `menu_` (e.g., `menu_dessiner()`)
-- French variable names for educational clarity
-- Comments in French with English translations in parentheses
+```cpp
+#ifndef NEWGAME_H
+#define NEWGAME_H
+
+#include "GameBase.h"
+#include "Display.h"
+#include "Input.h"
+
+// Game info for menu
+InfoJeu infoNewGame = {
+  "Game Name",
+  "Short description"
+};
+
+// Game variables (use prefix!)
+int ng_joueurX = 64;
+int ng_etatJeu = ETAT_EN_COURS;
+
+// Required functions
+void ng_setupJeu() { /* initialize */ }
+void ng_resetJeu() { /* reset to start */ }
+int ng_getEtatJeu() { return ng_etatJeu; }
+void ng_loopJeu() { /* main game loop */ }
+
+#endif
+```
+
+### Step 2: Register in Game.ino
+
+```cpp
+// At the top
+#include "NewGame.h"
+
+// In setup()
+menu_ajouterJeu(infoNewGame.nom);
+
+// In lancerJeu()
+if (numeroJeu == X) {
+  ng_resetJeu();
+  ng_setupJeu();
+}
+
+// In executerJeu()
+if (numeroJeu == X) {
+  ng_loopJeu();
+}
+```
+
+### Naming Convention
+
+**All game variables and functions MUST use a prefix** to avoid conflicts:
+- Monster Hunter: `mh_` (e.g., `mh_joueurX`, `mh_loopJeu()`)
+- Aventurier: `av_` (e.g., `av_niveau`, `av_dessiner()`)
+- New Game: `ng_` (e.g., `ng_score`, `ng_update()`)
+
+---
+
+## ⚠️ CRITICAL: Arduino Memory Constraints
+
+The Arduino Uno has **very limited memory**. Ignoring these rules causes crashes!
+
+### Memory Budget
+
+| Memory Type | Total | Safe Usage | Why |
+|-------------|-------|------------|-----|
+| Program | 32 KB | < 75% | Leave room for optimizations |
+| RAM | 2048 bytes | < 35-38% | OLED buffer takes 1024 bytes! |
+
+### Why RAM Usage Is Deceptive
+
+The compiler reports RAM usage but **does NOT count**:
+- **OLED display buffer: 1024 bytes** (half of total RAM!)
+- Stack space for function calls
+- Local variables inside functions
+
+**🚨 RULE: If compiler says 40%+ RAM, the game WILL crash!**
+
+### Memory-Safe Coding Rules
+
+1. **Maximum 5-6 game objects**
+   - ❌ `int plat[12][3]` = too many, will crash
+   - ✅ `int plat[5][3]` = safe
+
+2. **One combined function instead of many small ones**
+   - ❌ Separate functions `niveau1()`, `niveau2()`, `niveau3()`, `niveau4()`
+   - ✅ One function with `if/else`: `creerNiveau() { if (niveau == 1) {...} }`
+
+3. **Avoid melody functions during gameplay**
+   - ❌ `melodieVictoireBoss()` in game loop = crash risk
+   - ✅ Simple `tone(PIN, 1000, 100)` or no sound
+
+4. **No camera/scrolling** - adds complexity and memory
+
+5. **Keep level transitions simple**
+   - ❌ Multiple `ecrireTexte()` calls + melody + delays
+   - ✅ One message, short delay, move on
+
+### Safe Game Template
+
+```cpp
+// Maximum objects
+#define MAX_OBJETS 5
+
+// Small arrays only!
+int objets[MAX_OBJETS][3];  // x, y, type
+int nbObjets = 0;
+
+// Simple level transition - NO MELODY!
+void niveauTermine() {
+  effacerEcran();
+  ecrireTexte(20, 20, "BRAVO!", 2);
+  afficherEcran();
+  delay(1500);
+  niveau++;
+  resetJoueur();
+  creerNiveau();
+}
+```
+
+---
+
+## 🔧 Debugging Black Screen Crashes
+
+When the screen goes black, the program crashed. **Test incrementally:**
+
+| Step | What to test | What it validates |
+|------|--------------|-------------------|
+| 1 | Disable new game completely | Does menu work? (tests #include) |
+| 2 | Enable include but not in menu | Tests global variables |
+| 3 | Add to menu with simple loop only | Tests setup functions |
+| 4 | Add drawing function | Tests dessiner() |
+| 5 | Add controls + physics | Tests game logic |
+| 6 | Add level transitions | **Usually crashes here!** |
+
+**The crash happens in the LAST feature you added.**
+
+---
+
+## 🔌 Hardware Setup
+
+For breadboard diagrams and component placement, see the instructions in
+`.github/instructions/components.instructions.md`.
+
+### Current Hardware Configuration
+
+| Component | Arduino Pin | Purpose |
+|-----------|-------------|---------|
+| OLED Display | SDA (A4), SCL (A5) | Game display |
+| Joystick X | A0 | Horizontal movement |
+| Joystick Y | A1 | Vertical movement |
+| Joystick Button | D2 | Action button |
+| Buzzer | D8 | Sound effects |

@@ -17,7 +17,7 @@
 
 // Inclure les jeux (Include games)
 #include "MonsterHunter.h"  // Jeu Monster Hunter
-#include "Aventurier.h"     // Jeu d'aventure (Adventure game)
+#include "Aventurier.h"     // TEST: include mais pas dans menu
 
 // ==========================================================
 // ÉTATS DU SYSTÈME (System states)
@@ -51,7 +51,7 @@ void setup() {
   // Pour ajouter un nouveau jeu, ajoute une ligne ici!
   // (To add a new game, add a line here!)
   menu_ajouterJeu(infoMonsterHunter.nom);
-  menu_ajouterJeu(infoAventurier.nom);    // Aventurier!
+  menu_ajouterJeu(infoAventurier.nom);  // TEST ACTIVE
   
   // Afficher l'écran de démarrage (Show startup screen)
   menu_afficherDemarrage();
@@ -102,8 +102,8 @@ void lancerJeu(int numeroJeu) {
   
   if (numeroJeu == 0) {
     // Monster Hunter!
-    mh_resetJeu();      // Remettre à zéro (Reset)
-    mh_setupJeu();      // Préparer le jeu (Setup game)
+    mh_resetJeu();
+    mh_setupJeu();
   }
   
   if (numeroJeu == 1) {
