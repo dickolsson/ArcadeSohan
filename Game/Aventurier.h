@@ -12,6 +12,7 @@
 #include "Melodies.h"
 #include "ProgMem.h"    // Pour stocker niveaux en Flash!
 #include "Procedural.h" // Pour niveaux infinis!
+#include "Physics.h"    // Pour collision!
 
 // ==========================================================
 // INFORMATIONS DU JEU (Game information)
@@ -267,13 +268,11 @@ void av_dessiner() {
 // ==========================================================
 // COLLISION PORTE (Door collision)
 // ==========================================================
+// Simplifié avec Physics.h!
 
 bool av_touchePorte() {
-  int dx = av_joueurX - av_porteX;
-  int dy = av_joueurY - av_porteY;
-  if (dx < 0) dx = -dx;
-  if (dy < 0) dy = -dy;
-  return (dx < 8 && dy < 12);
+  // Le joueur touche la porte? (Player touches door?)
+  return phys_touchePoint(av_joueurX, av_joueurY, av_porteX, av_porteY + 6, 10);
 }
 
 void av_niveauTermine() {

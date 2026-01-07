@@ -12,5 +12,8 @@ build/
 *.swo
 *~
 
+# Notes
+SCRATCHPAD*.md
+
 # VSCode (optional - uncomment if you want to ignore)
 # .vscode/

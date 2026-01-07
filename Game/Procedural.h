@@ -1,18 +1,25 @@
 // ==========================================================
-// PROCEDURAL.H - Génération procédurale de niveaux
-// (Procedural level generation)
+// PROCEDURAL.H - Génération procédurale universelle
+// (Universal procedural generation)
 // ==========================================================
-// Ce module génère des niveaux automatiquement à partir
-// d'un "seed" (graine). Le même seed = le même niveau!
-// (This module generates levels automatically from a
-// "seed". Same seed = same level!)
+// Ce module génère des éléments de jeu automatiquement!
+// Fonctionne pour jeux de PLATEFORME et jeux VUE DU DESSUS.
+// (This module generates game elements automatically!
+// Works for PLATFORM games and TOP-VIEW games.)
 //
-// Avantage: Niveaux infinis sans utiliser de mémoire!
-// (Advantage: Infinite levels without using memory!)
+// Le même seed = le même résultat!
+// (Same seed = same result!)
 // ==========================================================
 
 #ifndef PROCEDURAL_H
 #define PROCEDURAL_H
+
+// ==========================================================
+// CONFIGURATION ÉCRAN (Screen configuration)
+// ==========================================================
+
+#define PROC_ECRAN_LARGEUR 128
+#define PROC_ECRAN_HAUTEUR 64
 
 // ==========================================================
 // GÉNÉRATEUR DE NOMBRES (Number generator)
@@ -27,8 +34,6 @@ unsigned long proc_seed = 1;
 
 // Initialiser le générateur avec un seed
 // (Initialize generator with a seed)
-// Conseil: utilise le numéro de niveau!
-// (Tip: use the level number!)
 void proc_init(unsigned long seed) {
   proc_seed = seed * 1103515245 + 12345;
 }
@@ -42,128 +47,239 @@ int proc_random(int minVal, int maxVal) {
 }
 
 // ==========================================================
-// GÉNÉRATION DE PLATEFORMES (Platform generation)
+// SECTION 1: FONCTIONS GÉNÉRIQUES (Generic functions)
 // ==========================================================
-// Génère des plateformes jouables automatiquement!
-// (Generates playable platforms automatically!)
+// Ces fonctions marchent pour TOUS les types de jeux!
+// (These functions work for ALL game types!)
+// ==========================================================
 
-// Configuration (Configuration)
-#define PROC_ECRAN_LARGEUR 128
-#define PROC_ECRAN_HAUTEUR 64
+// ----------------------------------------------------------
+// proc_genererPosition - Génère UNE position aléatoire
+// (Generates ONE random position)
+// ----------------------------------------------------------
+// Paramètres:
+//   seed   - Graine pour la génération (level number works!)
+//   index  - Numéro de l'élément (0, 1, 2...)
+//   x, y   - Pointeurs pour stocker le résultat
+//   marge  - Distance minimum des bords de l'écran
+//
+// Usage:
+//   int foodX, foodY;
+//   proc_genererPosition(niveau, 0, &foodX, &foodY, 10);
+
+void proc_genererPosition(int seed, int index, int* x, int* y, int marge) {
+  proc_init(seed * 11111 + index * 77777);
+  
+  *x = proc_random(marge, PROC_ECRAN_LARGEUR - marge);
+  *y = proc_random(marge, PROC_ECRAN_HAUTEUR - marge);
+}
+
+// ----------------------------------------------------------
+// proc_genererPositions - Génère PLUSIEURS positions
+// (Generates MULTIPLE positions)
+// ----------------------------------------------------------
+// Paramètres:
+//   seed      - Graine pour la génération
+//   positions - Tableau [n][2] pour stocker x,y
+//   nb        - Nombre de positions à générer
+//   marge     - Distance minimum des bords
+//
+// Usage:
+//   int items[5][2];
+//   proc_genererPositions(niveau, items, 5, 10);
+
+void proc_genererPositions(int seed, int positions[][2], int nb, int marge) {
+  for (int i = 0; i < nb; i++) {
+    proc_genererPosition(seed, i, &positions[i][0], &positions[i][1], marge);
+  }
+}
+
+// ----------------------------------------------------------
+// proc_genererLoinDe - Position loin d'un point donné
+// (Position far from a given point)
+// ----------------------------------------------------------
+// Parfait pour spawner des monstres loin du joueur!
+// (Perfect for spawning monsters far from player!)
+//
+// Paramètres:
+//   seed     - Graine pour la génération
+//   index    - Numéro de l'élément
+//   x, y     - Pointeurs pour le résultat
+//   eviterX  - Position X à éviter (joueur)
+//   eviterY  - Position Y à éviter (joueur)
+//   distMin  - Distance minimum requise
+//   marge    - Distance minimum des bords
+//
+// Usage:
+//   int monstreX, monstreY;
+//   proc_genererLoinDe(niveau, 0, &monstreX, &monstreY,
+//                      joueurX, joueurY, 40, 10);
+
+void proc_genererLoinDe(int seed, int index, int* x, int* y,
+                        int eviterX, int eviterY, int distMin, int marge) {
+  proc_init(seed * 54321 + index * 12345);
+  
+  int essais = 0;
+  int maxEssais = 20;
+  
+  do {
+    *x = proc_random(marge, PROC_ECRAN_LARGEUR - marge);
+    *y = proc_random(marge, PROC_ECRAN_HAUTEUR - marge);
+    
+    // Calculer distance (Calculate distance)
+    int dx = *x - eviterX;
+    int dy = *y - eviterY;
+    if (dx < 0) dx = -dx;
+    if (dy < 0) dy = -dy;
+    int distance = dx + dy;  // Distance Manhattan
+    
+    if (distance >= distMin) {
+      return;  // Position valide trouvée!
+    }
+    
+    essais++;
+  } while (essais < maxEssais);
+  
+  // Fallback: coin opposé au joueur
+  // (Fallback: corner opposite to player)
+  if (eviterX < PROC_ECRAN_LARGEUR / 2) {
+    *x = PROC_ECRAN_LARGEUR - marge - 10;
+  } else {
+    *x = marge + 10;
+  }
+  if (eviterY < PROC_ECRAN_HAUTEUR / 2) {
+    *y = PROC_ECRAN_HAUTEUR - marge - 10;
+  } else {
+    *y = marge + 10;
+  }
+}
+
+// ----------------------------------------------------------
+// proc_genererDansCoin - Position dans un coin aléatoire
+// (Position in a random corner)
+// ----------------------------------------------------------
+// Utile pour spawner dans les 4 coins de l'écran.
+// (Useful for spawning in the 4 screen corners.)
+//
+// Paramètres:
+//   seed   - Graine pour la génération
+//   index  - Numéro de l'élément
+//   x, y   - Pointeurs pour le résultat
+//   marge  - Zone de spawn depuis le coin
+//
+// Usage:
+//   int ennemisX, ennemisY;
+//   proc_genererDansCoin(niveau, 0, &enemyX, &enemyY, 25);
+
+void proc_genererDansCoin(int seed, int index, int* x, int* y, int marge) {
+  proc_init(seed * 99999 + index * 33333);
+  
+  int coin = proc_random(0, 3);
+  
+  if (coin == 0) {
+    // Haut-gauche (Top-left)
+    *x = proc_random(5, marge);
+    *y = proc_random(12, marge);
+  } else if (coin == 1) {
+    // Haut-droite (Top-right)
+    *x = proc_random(PROC_ECRAN_LARGEUR - marge, PROC_ECRAN_LARGEUR - 5);
+    *y = proc_random(12, marge);
+  } else if (coin == 2) {
+    // Bas-gauche (Bottom-left)
+    *x = proc_random(5, marge);
+    *y = proc_random(PROC_ECRAN_HAUTEUR - marge, PROC_ECRAN_HAUTEUR - 5);
+  } else {
+    // Bas-droite (Bottom-right)
+    *x = proc_random(PROC_ECRAN_LARGEUR - marge, PROC_ECRAN_LARGEUR - 5);
+    *y = proc_random(PROC_ECRAN_HAUTEUR - marge, PROC_ECRAN_HAUTEUR - 5);
+  }
+}
+
+// ==========================================================
+// SECTION 2: FONCTIONS PLATEFORME (Platform functions)
+// ==========================================================
+// Ces fonctions sont spécifiques aux jeux de plateforme.
+// (These functions are specific to platform games.)
+// ==========================================================
+
+// Configuration de saut (Jump configuration)
 #define PROC_SAUT_MAX_X 35      // Distance max saut horizontal
 #define PROC_SAUT_MAX_Y 20      // Distance max saut vertical
 
-// ==========================================================
-// VALIDATION DE SAUT (Jump validation)
-// ==========================================================
-// Vérifie si un saut est possible entre deux plateformes
-// (Checks if a jump is possible between two platforms)
-//
-// Règles de saut (Jump rules):
-// - Plus on saute haut (Y), moins on peut aller loin (X)
-// - Sauter vers le bas permet d'aller plus loin
-// - La difficulté permet des sauts plus proches de la limite
+// ----------------------------------------------------------
+// proc_sautPossible - Vérifie si un saut est faisable
+// (Checks if a jump is possible)
+// ----------------------------------------------------------
 
 bool proc_sautPossible(int deltaX, int deltaY, int difficulte) {
-  // deltaX = distance horizontale (toujours positive)
-  // deltaY = distance verticale (positive = monter, négatif = descendre)
+  int pourcentage = 70 + (difficulte * 10);
   
-  // Marge de sécurité selon difficulté (Safety margin by difficulty)
-  // Facile: 80%, Moyen: 90%, Difficile: 100% de la limite
-  int pourcentage = 70 + (difficulte * 10);  // 80, 90, 100
-  
-  // Distance X maximum selon la hauteur du saut
-  // (Max X distance based on jump height)
   int maxX;
-  
   if (deltaY <= 0) {
-    // Descendre ou même niveau = plus facile
-    // (Going down or same level = easier)
     maxX = PROC_SAUT_MAX_X + 5;
   } else if (deltaY <= 8) {
-    // Petit saut vers le haut (Small upward jump)
     maxX = PROC_SAUT_MAX_X;
   } else if (deltaY <= 14) {
-    // Saut moyen (Medium jump)
     maxX = PROC_SAUT_MAX_X - 8;
   } else {
-    // Grand saut vers le haut (Big upward jump)
     maxX = PROC_SAUT_MAX_X - 15;
   }
   
-  // Appliquer la marge de difficulté
   maxX = (maxX * pourcentage) / 100;
-  
   return (deltaX <= maxX);
 }
 
-// Générer des plateformes pour un niveau
-// (Generate platforms for a level)
-//
-// Paramètres (Parameters):
-//   niveau     - Numéro du niveau (level number)
-//   plat       - Tableau destination [n][3] (x, y, largeur)
-//   nbPlat     - Nombre de plateformes à générer
+// ----------------------------------------------------------
+// proc_genererPlateformes - Génère des plateformes jouables
+// (Generates playable platforms)
+// ----------------------------------------------------------
+// Paramètres:
+//   niveau     - Numéro du niveau (used as seed)
+//   plat       - Tableau [n][3] pour x, y, largeur
+//   nbPlat     - Nombre de plateformes
 //   difficulte - 1=facile, 2=moyen, 3=difficile
 //
-// Retourne: position Y de la dernière plateforme
+// Retourne: Y de la dernière plateforme
 //
 // Usage:
-//   int dernierY = proc_genererPlateformes(niveau, av_plat, 5, 1);
+//   int dernierY = proc_genererPlateformes(niveau, plat, 5, 1);
 
 int proc_genererPlateformes(int niveau, int plat[][3], int nbPlat, int difficulte) {
-  // Initialiser avec le numéro de niveau comme seed
   proc_init(niveau * 12345);
   
-  // Largeur des plateformes selon difficulté
-  // (Platform width based on difficulty)
-  int largeurMin = 35 - (difficulte * 8);  // 27, 19, 11
-  int largeurMax = 45 - (difficulte * 8);  // 37, 29, 21
+  int largeurMin = 35 - (difficulte * 8);
+  int largeurMax = 45 - (difficulte * 8);
   if (largeurMin < 15) largeurMin = 15;
   if (largeurMax < 20) largeurMax = 20;
   
-  // Première plateforme: toujours en bas à gauche (spawn)
-  // (First platform: always bottom-left for spawn)
+  // Première plateforme: spawn en bas à gauche
   plat[0][0] = 0;
   plat[0][1] = 56;
   plat[0][2] = 40;
   
-  // Position actuelle pour construire le chemin
-  int dernierX = 20;  // Centre de la première plateforme
+  int dernierX = 20;
   int dernierY = 56;
   int dernierLargeur = 40;
   
-  // Générer les autres plateformes
   for (int i = 1; i < nbPlat; i++) {
     int nouveauX, nouveauY, largeur;
     int deltaX, deltaY;
     int essais = 0;
     
-    // Essayer jusqu'à trouver une position valide
-    // (Try until we find a valid position)
     do {
-      // Calculer la prochaine position
       deltaX = proc_random(15, PROC_SAUT_MAX_X);
       deltaY = proc_random(6, PROC_SAUT_MAX_Y);
       
-      // Alterner gauche/droite mais monter toujours
       int direction = proc_random(0, 100);
-      
       if (direction < 40) {
-        // Aller à gauche
         nouveauX = dernierX - deltaX;
       } else {
-        // Aller à droite
         nouveauX = dernierX + deltaX;
       }
       
-      // Monter (Y diminue car 0 est en haut)
       nouveauY = dernierY - deltaY;
-      
-      // Largeur aléatoire
       largeur = proc_random(largeurMin, largeurMax);
       
-      // Garder dans les limites de l'écran
       if (nouveauX < 5) nouveauX = 5;
       if (nouveauX > PROC_ECRAN_LARGEUR - largeur - 5) {
         nouveauX = PROC_ECRAN_LARGEUR - largeur - 5;
@@ -171,25 +287,18 @@ int proc_genererPlateformes(int niveau, int plat[][3], int nbPlat, int difficult
       if (nouveauY < 10) nouveauY = 10;
       if (nouveauY > 50) nouveauY = 50;
       
-      // Recalculer deltaX réel après ajustements
       int centreNouveau = nouveauX + largeur / 2;
       deltaX = dernierX - centreNouveau;
       if (deltaX < 0) deltaX = -deltaX;
       
-      // Ajuster deltaX pour tenir compte des largeurs
-      // Le joueur peut sauter depuis le bord de la plateforme
-      // (Adjust deltaX to account for platform widths)
       int bordDerniere = dernierLargeur / 2;
       int bordNouvelle = largeur / 2;
       deltaX = deltaX - bordDerniere - bordNouvelle;
       if (deltaX < 0) deltaX = 0;
       
       deltaY = dernierY - nouveauY;
-      
       essais++;
       
-      // Après 10 essais, forcer une plateforme proche
-      // (After 10 tries, force a close platform)
       if (essais > 10) {
         nouveauX = dernierX + proc_random(-20, 20);
         if (nouveauX < 5) nouveauX = 5;
@@ -203,134 +312,77 @@ int proc_genererPlateformes(int niveau, int plat[][3], int nbPlat, int difficult
       
     } while (!proc_sautPossible(deltaX, deltaY, difficulte));
     
-    // Sauvegarder la plateforme
     plat[i][0] = nouveauX;
     plat[i][1] = nouveauY;
     plat[i][2] = largeur;
     
-    // Mettre à jour la position pour la prochaine
     dernierX = nouveauX + largeur / 2;
     dernierY = nouveauY;
     dernierLargeur = largeur;
   }
   
-  return dernierY;  // Retourne Y de la dernière plateforme
+  return dernierY;
 }
 
-// ==========================================================
-// GÉNÉRATION DE PORTE/OBJECTIF (Door/objective generation)
-// ==========================================================
-// Place la porte sur ou près de la dernière plateforme
-// (Places door on or near the last platform)
+// ----------------------------------------------------------
+// proc_genererPorte - Place la porte sur dernière plateforme
+// (Places door on last platform)
+// ----------------------------------------------------------
 
 void proc_genererPorte(int plat[][3], int nbPlat, int* porteX, int* porteY) {
-  // Prendre la dernière plateforme
   int dernierePlat = nbPlat - 1;
   int px = plat[dernierePlat][0];
   int py = plat[dernierePlat][1];
   int pl = plat[dernierePlat][2];
   
-  // Placer la porte au centre de la plateforme
   *porteX = px + pl / 2;
-  *porteY = py - 14;  // Au-dessus de la plateforme
+  *porteY = py - 14;
 }
 
-// ==========================================================
-// GÉNÉRATION D'ENNEMIS (Enemy generation)
-// ==========================================================
-// Génère des positions d'ennemis sur les plateformes
-// (Generates enemy positions on platforms)
+// ----------------------------------------------------------
+// proc_genererSurPlateforme - Position sur une plateforme
+// (Position on a platform)
+// ----------------------------------------------------------
+// Utile pour placer ennemis ou items sur les plateformes.
+// (Useful for placing enemies or items on platforms.)
 //
-// Usage:
-//   proc_genererEnnemis(niveau, plat, 5, ennemis, 3);
+// Paramètres:
+//   seed       - Graine pour génération
+//   index      - Numéro de l'élément
+//   plat       - Tableau des plateformes
+//   nbPlat     - Nombre de plateformes
+//   x, y       - Pointeurs pour le résultat
+//   hauteur    - Hauteur au-dessus de la plateforme
 
-void proc_genererEnnemis(int niveau, int plat[][3], int nbPlat, 
-                         int ennemis[][2], int nbEnnemis) {
-  // Réinitialiser avec seed différent pour les ennemis
-  proc_init(niveau * 54321);
+void proc_genererSurPlateforme(int seed, int index, int plat[][3], int nbPlat,
+                                int* x, int* y, int hauteur) {
+  proc_init(seed * 54321 + index * 11111);
   
-  for (int i = 0; i < nbEnnemis; i++) {
-    // Choisir une plateforme (pas la première = spawn)
-    int indexPlat = proc_random(1, nbPlat - 1);
-    
-    // Position sur la plateforme
-    int px = plat[indexPlat][0];
-    int py = plat[indexPlat][1];
-    int pl = plat[indexPlat][2];
-    
-    // X aléatoire sur la plateforme
-    ennemis[i][0] = px + proc_random(5, pl - 5);
-    // Y juste au-dessus de la plateforme
-    ennemis[i][1] = py - 8;
-  }
+  // Choisir plateforme (pas la première = spawn)
+  int indexPlat = proc_random(1, nbPlat - 1);
+  
+  int px = plat[indexPlat][0];
+  int py = plat[indexPlat][1];
+  int pl = plat[indexPlat][2];
+  
+  *x = px + proc_random(5, pl - 5);
+  *y = py - hauteur;
 }
 
 // ==========================================================
-// GÉNÉRATION DE COLLECTIBLES (Collectible generation)
+// SECTION 3: UTILITAIRES (Utilities)
 // ==========================================================
-// Génère des étoiles/pièces à collecter
-// (Generates stars/coins to collect)
 
-void proc_genererCollectibles(int niveau, int plat[][3], int nbPlat,
-                              int items[][2], int nbItems) {
-  // Seed différent pour les items
-  proc_init(niveau * 98765);
-  
-  for (int i = 0; i < nbItems; i++) {
-    // Choisir une plateforme
-    int indexPlat = proc_random(0, nbPlat - 1);
-    
-    int px = plat[indexPlat][0];
-    int py = plat[indexPlat][1];
-    int pl = plat[indexPlat][2];
-    
-    // Position au-dessus de la plateforme
-    items[i][0] = px + proc_random(5, pl - 5);
-    items[i][1] = py - proc_random(15, 25);  // En l'air
-  }
-}
-
-// ==========================================================
-// DIFFICULTÉ PROGRESSIVE (Progressive difficulty)
-// ==========================================================
-// Calcule la difficulté basée sur le niveau
-// (Calculates difficulty based on level)
-//
+// ----------------------------------------------------------
+// proc_calculerDifficulte - Difficulté basée sur le niveau
+// (Difficulty based on level)
+// ----------------------------------------------------------
 // Retourne: 1 (facile), 2 (moyen), 3 (difficile)
 
 int proc_calculerDifficulte(int niveau) {
-  if (niveau <= 3) return 1;       // Niveaux 1-3: facile
-  if (niveau <= 7) return 2;       // Niveaux 4-7: moyen
-  return 3;                         // Niveau 8+: difficile
+  if (niveau <= 3) return 1;
+  if (niveau <= 7) return 2;
+  return 3;
 }
-
-// ==========================================================
-// EXEMPLE COMPLET (Complete example)
-// ==========================================================
-/*
-// Dans ton jeu (In your game):
-
-#include "Procedural.h"
-
-int gn_plat[5][3];
-int gn_porteX, gn_porteY;
-int gn_niveau = 1;
-
-void gn_creerNiveau() {
-  // Calculer la difficulté automatiquement
-  int diff = proc_calculerDifficulte(gn_niveau);
-  
-  // Générer 5 plateformes
-  proc_genererPlateformes(gn_niveau, gn_plat, 5, diff);
-  
-  // Placer la porte
-  proc_genererPorte(gn_plat, 5, &gn_porteX, &gn_porteY);
-}
-
-// Maintenant tu as des NIVEAUX INFINIS!
-// Le niveau 1 sera toujours identique (même seed).
-// Le niveau 100 sera différent mais toujours le même niveau 100!
-
-*/
 
 #endif

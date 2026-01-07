@@ -78,6 +78,8 @@ Game/
 ├── Menu.h            # Game selection menu
 ├── ProgMem.h         # 💾 Store data in Flash (CRITICAL!)
 ├── Procedural.h      # 🎲 Procedural level generation
+├── Physics.h         # 💥 Collision detection & movement
+├── Objects.h         # 📦 Object pools for collectibles/enemies
 ├── MonsterHunter.h   # Game 1: Monster Hunter
 └── Aventurier.h      # Game 2: Platform adventure
 ```
@@ -92,7 +94,9 @@ When creating new games, use these existing modules:
 | **Input.h** | `lireJoystick()`, `boutonJustePresse()`, `joystickHaut()`, `joystickBas()`, `joystickGauche()`, `joystickDroite()` |
 | **Melodies.h** | `melodieStartup()`, `melodieGameOver()`, `melodieTir()` |
 | **ProgMem.h** | `NIVEAU_PROGMEM()`, `CONFIG_PROGMEM()`, `TEXTE_PROGMEM()`, `pm_charger3Colonnes()`, `pm_lireTexte()` |
-| **Procedural.h** | `proc_genererPlateformes()`, `proc_genererPorte()`, `proc_calculerDifficulte()` |
+| **Procedural.h** | `proc_genererPosition()`, `proc_genererLoinDe()`, `proc_genererPlateformes()`, `proc_calculerDifficulte()` - See `.github/instructions/procedural.instructions.md` |
+| **Physics.h** | `phys_touchePoint()`, `phys_toucheBoite()`, `phys_distance()`, `phys_bougerVers()`, `phys_clamp()` - See `.github/instructions/physics.instructions.md` |
+| **Objects.h** | `obj_creer()`, `obj_supprimer()`, `obj_touchePoint()`, `objm_bougerTous()` - See `.github/instructions/objects.instructions.md` |
 
 ### Game States (defined in GameBase.h)
 
@@ -234,7 +238,11 @@ ecrireTexte(10, 10, pm_lireTexte(gn_txtBravo), 2);
 
 ## 🎲 Procedural Generation with Procedural.h
 
-For **infinite levels** without memory cost - see `.github/instructions/memory.instructions.md` for details.
+**See `.github/instructions/procedural.instructions.md` for full API reference!**
+
+For **infinite levels** without memory cost. Works for both platform games AND top-view games!
+
+### Platform Games (Aventurier style)
 
 ```cpp
 #include "Procedural.h"
@@ -249,6 +257,19 @@ void gn_creerNiveau() {
     proc_genererPorte(gn_plat, 5, &porteX, &porteY);
   }
 }
+```
+
+### Top-View Games (Monster Hunter style)
+
+```cpp
+#include "Procedural.h"
+
+// Spawn monster far from player
+proc_genererLoinDe(niveau, spawnCounter, &monstreX, &monstreY,
+                   joueurX, joueurY, 40, 10);
+
+// Spawn food anywhere
+proc_genererPosition(niveau, spawnCounter, &foodX, &foodY, 10);
 ```
 
 ---

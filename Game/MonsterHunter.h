@@ -13,7 +13,9 @@
 #include "Display.h"
 #include "Input.h"
 #include "Melodies.h"
-#include "ProgMem.h"  // Pour stocker config en Flash!
+#include "ProgMem.h"    // Pour stocker config en Flash!
+#include "Procedural.h"  // Pour génération procédurale!
+#include "Physics.h"     // Pour collision et distance!
 
 // ==========================================================
 // INFORMATIONS DU JEU (Game information)
@@ -173,128 +175,69 @@ int mh_bossTues = 0;
 // État du jeu (Game state)
 int mh_etatJeu = ETAT_EN_COURS;
 
+// Compteur de spawn pour génération procédurale
+// (Spawn counter for procedural generation)
+int mh_spawnNourriture = 0;
+int mh_spawnMonstre = 0;
+
 // ==========================================================
 // FONCTIONS UTILITAIRES (Utility functions)
 // ==========================================================
-
-// Calculer la distance entre deux points (Calculate distance between two points)
-int mh_calculerDistance(int x1, int y1, int x2, int y2) {
-  int diffX = x1 - x2;
-  int diffY = y1 - y2;
-  
-  if (diffX < 0) diffX = -diffX;
-  if (diffY < 0) diffY = -diffY;
-  
-  if (diffX > diffY) {
-    return diffX + diffY / 2;
-  } else {
-    return diffY + diffX / 2;
-  }
-}
+// Note: mh_calculerDistance() supprimé - utilise phys_distance() de Physics.h!
+// (Note: mh_calculerDistance() removed - use phys_distance() from Physics.h!)
 
 // Placer la nourriture au hasard (Place food randomly)
+// Utilise génération procédurale!
 void mh_placerNourriture() {
-  mh_nourritureX = random(10, LARGEUR_ECRAN - 10);
-  mh_nourritureY = random(15, HAUTEUR_ECRAN - 10);
+  mh_spawnNourriture++;
+  proc_genererPosition(mh_niveau * 100 + mh_spawnNourriture, 0,
+                       &mh_nourritureX, &mh_nourritureY, 10);
+  // Ajuster Y pour éviter la barre de score
+  if (mh_nourritureY < 15) mh_nourritureY = 15;
 }
 
 // Placer le monstre au hasard (Place monster randomly)
+// Utilise génération procédurale - loin du joueur!
 void mh_placerMonstre() {
-  int tentatives = 0;
-  int maxTentatives = 20;
-  int distance = 0;
+  mh_spawnMonstre++;
   int distanceMin = mh_distanceMinMonstre;
   
   if (mh_estBoss) {
     distanceMin = mh_distanceMinMonstre + 10;
   }
   
-  do {
-    int coin = random(0, 4);
-    
-    if (coin == 0) {
-      mh_monstreX = random(5, 30);
-      mh_monstreY = random(12, 25);
-    }
-    if (coin == 1) {
-      mh_monstreX = random(90, 115);
-      mh_monstreY = random(12, 25);
-    }
-    if (coin == 2) {
-      mh_monstreX = random(5, 30);
-      mh_monstreY = random(45, 55);
-    }
-    if (coin == 3) {
-      mh_monstreX = random(90, 115);
-      mh_monstreY = random(45, 55);
-    }
-    
-    distance = mh_calculerDistance(mh_monstreX, mh_monstreY, mh_joueurX, mh_joueurY);
-    tentatives = tentatives + 1;
-    
-  } while (distance < distanceMin && tentatives < maxTentatives);
+  // Utiliser proc_genererLoinDe pour spawner loin du joueur!
+  proc_genererLoinDe(mh_niveau * 200 + mh_spawnMonstre, 0,
+                     &mh_monstreX, &mh_monstreY,
+                     mh_joueurX, mh_joueurY, distanceMin, 10);
   
-  if (distance < distanceMin) {
-    if (mh_joueurX < LARGEUR_ECRAN / 2) {
-      mh_monstreX = random(90, 115);
-    } else {
-      mh_monstreX = random(5, 30);
-    }
-    
-    if (mh_joueurY < HAUTEUR_ECRAN / 2) {
-      mh_monstreY = random(45, 55);
-    } else {
-      mh_monstreY = random(12, 25);
-    }
-  }
+  // Ajuster Y pour éviter la barre de score
+  if (mh_monstreY < 12) mh_monstreY = 12;
 }
 
 // Vérifier collision avec nourriture (Check collision with food)
+// Simplifié avec Physics.h!
 bool mh_verifierCollisionNourriture() {
-  int distanceX = mh_joueurX - mh_nourritureX;
-  int distanceY = mh_joueurY - mh_nourritureY;
-  
-  if (distanceX < 0) distanceX = -distanceX;
-  if (distanceY < 0) distanceY = -distanceY;
-  
-  if (distanceX < (mh_tailleJoueur + mh_tailleNourriture) / 2 + 3) {
-    if (distanceY < (mh_tailleJoueur + mh_tailleNourriture) / 2 + 3) {
-      return true;
-    }
-  }
-  return false;
+  int seuil = (mh_tailleJoueur + mh_tailleNourriture) / 2 + 3;
+  return phys_touchePoint(mh_joueurX, mh_joueurY,
+                          mh_nourritureX, mh_nourritureY, seuil);
 }
 
 // Vérifier collision avec monstre (Check collision with monster)
+// Simplifié avec Physics.h!
 bool mh_verifierCollisionMonstre() {
-  int distanceX = mh_joueurX - mh_monstreX;
-  int distanceY = mh_joueurY - mh_monstreY;
-  
-  if (distanceX < 0) distanceX = -distanceX;
-  if (distanceY < 0) distanceY = -distanceY;
-  
-  if (distanceX < (mh_tailleJoueur + mh_tailleMonstreActuelle) / 2 + 2) {
-    if (distanceY < (mh_tailleJoueur + mh_tailleMonstreActuelle) / 2 + 2) {
-      return true;
-    }
-  }
-  return false;
+  int seuil = (mh_tailleJoueur + mh_tailleMonstreActuelle) / 2 + 2;
+  return phys_touchePoint(mh_joueurX, mh_joueurY,
+                          mh_monstreX, mh_monstreY, seuil);
 }
 
 // Vérifier collision tir-monstre (Check shot-monster collision)
+// Simplifié avec Physics.h!
 bool mh_verifierCollisionTirMonstre() {
-  int distanceX = mh_tirX - mh_monstreX - mh_tailleMonstreActuelle / 2;
-  int distanceY = mh_tirY - mh_monstreY - mh_tailleMonstreActuelle / 2;
-  
-  if (distanceX < 0) distanceX = -distanceX;
-  if (distanceY < 0) distanceY = -distanceY;
-  
-  if (distanceX < mh_tailleMonstreActuelle / 2 + 2) {
-    if (distanceY < mh_tailleMonstreActuelle / 2 + 2) {
-      return true;
-    }
-  }
-  return false;
+  int centreMX = mh_monstreX + mh_tailleMonstreActuelle / 2;
+  int centreMY = mh_monstreY + mh_tailleMonstreActuelle / 2;
+  int seuil = mh_tailleMonstreActuelle / 2 + 2;
+  return phys_touchePoint(mh_tirX, mh_tirY, centreMX, centreMY, seuil);
 }
 
 // Activer le mode boss (Activate boss mode)
@@ -499,6 +442,8 @@ void mh_resetJeu() {
   mh_vieBoss = 0;
   mh_tailleMonstreActuelle = mh_tailleMonstre;
   mh_etatJeu = ETAT_EN_COURS;
+  mh_spawnNourriture = 0;
+  mh_spawnMonstre = 0;
   
   mh_placerNourriture();
   mh_placerMonstre();
@@ -606,15 +551,13 @@ void mh_loopJeu() {
   }
   
   // ===== MOUVEMENT DU MONSTRE (MONSTER MOVEMENT) =====
+  // Simplifié avec Physics.h!
   mh_compteurMonstre = mh_compteurMonstre + mh_vitesseMonstre;
   
   if (mh_compteurMonstre >= mh_delaiMonstre) {
     mh_compteurMonstre = 0;
-    
-    if (mh_monstreX < mh_joueurX) mh_monstreX = mh_monstreX + 1;
-    if (mh_monstreX > mh_joueurX) mh_monstreX = mh_monstreX - 1;
-    if (mh_monstreY < mh_joueurY) mh_monstreY = mh_monstreY + 1;
-    if (mh_monstreY > mh_joueurY) mh_monstreY = mh_monstreY - 1;
+    // Utilise phys_bougerVers pour suivre le joueur!
+    phys_bougerVers(&mh_monstreX, &mh_monstreY, mh_joueurX, mh_joueurY, 1);
   }
   
   // Vérifier collision avec nourriture (Check collision with food)
