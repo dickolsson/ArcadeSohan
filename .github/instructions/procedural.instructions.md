@@ -2,265 +2,118 @@
 applyTo: "Game/**"
 ---
 
-# 🎲 Procedural.h API Instructions
+# 🎲 Procedural.h - Level Generation
 
-This module provides **procedural generation** for game elements. It works for both **platform games** (like Aventurier) and **top-view games** (like Monster Hunter).
+## Overview
 
-**Key benefit:** Same seed = same result. Infinite levels without using RAM!
+Procedural generation for game elements. **Same seed = same result.** Infinite levels without using RAM!
 
 ---
 
-## 🌱 How Seeds Work
-
-The procedural generator uses a **seed** (graine) to create "random" numbers that are always the same for the same seed:
+## How Seeds Work
 
 ```cpp
-// Level 5 will ALWAYS generate the same platforms
+// Level 5 always generates the same platforms
 proc_genererPlateformes(5, plat, 5, 1);
 
-// Same level, same spawn = same position
+// Same seed + index = same position
 proc_genererPosition(niveau, 0, &x, &y, 10);
 ```
 
-**Tip:** Use the level number as seed. Add counters for multiple spawns per level.
+**Tip:** Use level number as seed. Add counters for multiple spawns.
 
 ---
 
-## 📦 Section 1: Generic Functions (All Game Types)
+## Quick Reference
 
-These functions work for **any type of game** - platform, top-view, puzzle, etc.
+### Position Generation
 
-### proc_genererPosition()
+| Function | Description |
+|----------|-------------|
+| `proc_genererPosition(seed, idx, &x, &y, margin)` | Random position |
+| `proc_genererPositions(seed, arr, n, margin)` | Multiple positions |
+| `proc_genererLoinDe(seed, idx, &x, &y, avoidX, avoidY, minDist, margin)` | Far from point |
+| `proc_genererDansCoin(seed, idx, &x, &y, margin)` | In a corner |
 
-Generate ONE random position on screen.
+### Platform Generation
 
-```cpp
-// Parameters:
-//   seed  - Generation seed (use level number)
-//   index - Element number (0, 1, 2...)
-//   x, y  - Pointers to store result
-//   marge - Minimum distance from screen edges
+| Function | Description |
+|----------|-------------|
+| `proc_genererPlateformes(level, plat, n, diff)` | Generate jumpable platforms |
+| `proc_genererPorte(plat, n, &x, &y)` | Place door on last platform |
+| `proc_genererSurPlateforme(seed, idx, plat, n, &x, &y, height)` | Position on platform |
 
-int foodX, foodY;
-proc_genererPosition(niveau, 0, &foodX, &foodY, 10);
-```
+### Utilities
 
-### proc_genererPositions()
-
-Generate MULTIPLE positions at once.
-
-```cpp
-// Parameters:
-//   seed      - Generation seed
-//   positions - Array [n][2] for x,y pairs
-//   nb        - Number of positions to generate
-//   marge     - Minimum distance from edges
-
-int items[5][2];  // 5 items, each with x,y
-proc_genererPositions(niveau, items, 5, 10);
-
-// Access: items[0][0] = x, items[0][1] = y
-```
-
-### proc_genererLoinDe()
-
-Generate position FAR from a given point. **Perfect for spawning enemies!**
-
-```cpp
-// Parameters:
-//   seed     - Generation seed
-//   index    - Element number
-//   x, y     - Pointers to store result
-//   eviterX  - X position to avoid (player)
-//   eviterY  - Y position to avoid (player)
-//   distMin  - Minimum distance required
-//   marge    - Distance from screen edges
-
-int monstreX, monstreY;
-proc_genererLoinDe(niveau, spawnCounter, &monstreX, &monstreY,
-                   joueurX, joueurY, 40, 10);
-```
-
-### proc_genererDansCoin()
-
-Generate position in a random corner of the screen.
-
-```cpp
-// Parameters:
-//   seed  - Generation seed
-//   index - Element number
-//   x, y  - Pointers to store result
-//   marge - Spawn zone size from corner
-
-int enemyX, enemyY;
-proc_genererDansCoin(niveau, 0, &enemyX, &enemyY, 25);
-```
+| Function | Description |
+|----------|-------------|
+| `proc_calculerDifficulte(level)` | Returns 1-3 based on level |
+| `proc_init(seed)` | Initialize random generator |
+| `proc_random(min, max)` | Get random number |
 
 ---
 
-## 🏃 Section 2: Platform Game Functions
-
-These functions are specific to **platform games** with jumping mechanics.
-
-### proc_genererPlateformes()
-
-Generate playable, jumpable platforms.
-
-```cpp
-// Parameters:
-//   niveau     - Level number (used as seed)
-//   plat       - Array [n][3] for x, y, width
-//   nbPlat     - Number of platforms to generate
-//   difficulte - 1=easy, 2=medium, 3=hard
-
-// Returns: Y position of last platform
-
-int plat[5][3];
-int lastY = proc_genererPlateformes(niveau, plat, 5, 1);
-```
-
-**The first platform is always at (0, 56) for player spawn.**
-
-### proc_genererPorte()
-
-Place the door/goal on the last platform.
-
-```cpp
-// Parameters:
-//   plat    - Platform array
-//   nbPlat  - Number of platforms
-//   porteX  - Pointer to store door X
-//   porteY  - Pointer to store door Y
-
-int porteX, porteY;
-proc_genererPorte(plat, 5, &porteX, &porteY);
-```
-
-### proc_genererSurPlateforme()
-
-Generate a position ON a platform (for items or enemies).
-
-```cpp
-// Parameters:
-//   seed     - Generation seed
-//   index    - Element number
-//   plat     - Platform array
-//   nbPlat   - Number of platforms
-//   x, y     - Pointers to store result
-//   hauteur  - Height above platform
-
-int starX, starY;
-proc_genererSurPlateforme(niveau, 0, plat, 5, &starX, &starY, 15);
-```
-
-**Note:** Avoids the first platform (spawn point).
-
----
-
-## 🛠️ Section 3: Utilities
-
-### proc_calculerDifficulte()
-
-Calculate difficulty based on level number.
-
-```cpp
-// Returns: 1 (easy), 2 (medium), 3 (hard)
-
-int diff = proc_calculerDifficulte(niveau);
-// Levels 1-3: returns 1
-// Levels 4-7: returns 2
-// Levels 8+:  returns 3
-```
-
-### proc_random()
-
-Get a random number (after initializing with proc_init).
-
-```cpp
-proc_init(seed);
-int value = proc_random(minVal, maxVal);
-```
-
----
-
-## 🎮 Complete Examples
-
-### Platform Game (Aventurier style)
-
-```cpp
-#include "Procedural.h"
-
-int gn_plat[5][3];
-int gn_porteX, gn_porteY;
-
-void gn_creerNiveau() {
-  if (gn_niveau <= 4) {
-    // Hand-crafted levels from PROGMEM
-    pm_chargerNiveau(gn_niveaux[gn_niveau], gn_plat, 5);
-  } else {
-    // Procedural levels 5+
-    int diff = proc_calculerDifficulte(gn_niveau);
-    proc_genererPlateformes(gn_niveau, gn_plat, 5, diff);
-    proc_genererPorte(gn_plat, 5, &gn_porteX, &gn_porteY);
-  }
-}
-```
+## Examples
 
 ### Top-View Game (Monster Hunter style)
 
 ```cpp
-#include "Procedural.h"
+int spawnCounter = 0;
 
-int mh_spawnCounter = 0;
-
-void mh_placerMonstre() {
-  mh_spawnCounter++;
-  proc_genererLoinDe(mh_niveau * 100 + mh_spawnCounter, 0,
-                     &mh_monstreX, &mh_monstreY,
-                     mh_joueurX, mh_joueurY, 40, 10);
+void placerMonstre() {
+  spawnCounter++;
+  proc_genererLoinDe(niveau * 100 + spawnCounter, 0,
+                     &monstreX, &monstreY,
+                     joueurX, joueurY, 40, 10);
 }
 
-void mh_placerNourriture() {
-  mh_spawnCounter++;
-  proc_genererPosition(mh_niveau * 100 + mh_spawnCounter, 0,
-                       &mh_nourritureX, &mh_nourritureY, 10);
+void placerNourriture() {
+  spawnCounter++;
+  proc_genererPosition(niveau * 100 + spawnCounter, 0,
+                       &nourritureX, &nourritureY, 10);
 }
+```
 
-void mh_resetJeu() {
-  mh_spawnCounter = 0;  // Reset for new game
-  // ... other resets
+### Platform Game (Aventurier style)
+
+```cpp
+void creerNiveau() {
+  if (niveau <= 4) {
+    // Hand-crafted from PROGMEM
+    pm_charger3Colonnes(niveaux[niveau], plat, 5);
+  } else {
+    // Procedural for level 5+
+    int diff = proc_calculerDifficulte(niveau);
+    proc_genererPlateformes(niveau, plat, 5, diff);
+    proc_genererPorte(plat, 5, &porteX, &porteY);
+  }
 }
+```
+
+### Spawning on Platforms
+
+```cpp
+// Spawn collectible on a platform
+int starX, starY;
+proc_genererSurPlateforme(niveau, 0, plat, 5, &starX, &starY, 15);
 ```
 
 ---
 
-## 📏 Screen Coordinates Reference
+## Difficulty Levels
 
-| Constant | Value | Meaning |
-|----------|-------|---------|
-| `PROC_ECRAN_LARGEUR` | 128 | Screen width in pixels |
-| `PROC_ECRAN_HAUTEUR` | 64 | Screen height in pixels |
-
-**Note:** Y=0 is at the TOP of the screen. Y increases downward.
+```cpp
+int diff = proc_calculerDifficulte(niveau);
+// Levels 1-3: returns 1 (easy)
+// Levels 4-7: returns 2 (medium)
+// Levels 8+:  returns 3 (hard)
+```
 
 ---
 
-## 💡 Tips
+## Tips
 
-1. **Use spawn counters** - Increment a counter each time you spawn something to get different positions with the same level seed.
-
-2. **Adjust for status bars** - If you have a score bar at the top, check that Y is not too small:
-   ```cpp
-   if (monstreY < 12) monstreY = 12;
-   ```
-
-3. **Combine with PROGMEM** - Use hand-crafted PROGMEM levels for early game, procedural for infinite mode:
-   ```cpp
-   if (niveau <= 4) {
-     pm_chargerNiveau(niveaux[niveau], plat, 5);
-   } else {
-     proc_genererPlateformes(niveau, plat, 5, diff);
-   }
-   ```
-
-4. **Same seed = same level** - Players can replay the same level by using the same seed!
+1. **Use spawn counters** for different positions with same level seed
+2. **Adjust for score bar:** `if (y < 12) y = 12;`
+3. **Combine with PROGMEM:** Hand-craft early levels, generate later ones
+4. **Same seed = replay:** Players can retry the same level

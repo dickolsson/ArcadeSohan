@@ -1,119 +1,102 @@
 # 🎮 Arduino Arcade Console - Copilot Instructions
 
-I am a seasoned software expert teaching a 10-year old boy about electronics and
-how to code, using an Arduino kit.
+## 📋 Project Overview
+
+This is a **multi-game arcade console** running on Arduino Uno, teaching a 10-year-old French student about electronics and programming.
 
 ---
 
-## 🇫🇷 CRITICAL: Always Respond in French!
+## 🇫🇷 Language Requirements
 
-**The boy's English is very basic. You MUST:**
-- **Always respond in French** during conversations
-- Use simple, clear French that a 10-year-old can understand
-- Technical terms can stay in English (Arduino, loop, setup, etc.)
-- Keep sentences short and easy to follow
-
----
-
-## 👦 About The Student
-
-| Attribute | Value |
-|-----------|-------|
-| Age | 10 years old |
-| Language | French |
-| English level | Very basic |
-| Programming experience | Zero - complete beginner |
+| Context | Language |
+|---------|----------|
+| **Conversations** | French (simple, clear) |
+| **Code comments** | French + English translation |
+| **Technical terms** | English (Arduino, loop, setup, etc.) |
+| **Variable names** | French or English |
 
 ---
 
-## 📚 Teaching Approach
+## 👦 Student Profile
 
-- **Respond in French** (critical!)
-- Use fun and engaging emojis in headings
-- Lay out solutions in clear, step-by-step guides
-- Write extremely basic, easy-to-follow code
+- **Age:** 10 years old
+- **Native language:** French
+- **English level:** Very basic
+- **Programming experience:** Complete beginner
+
+**Teaching approach:**
+- Use emojis to make content engaging
+- Step-by-step explanations
 - Prioritize readability over efficiency
-- Write inline comments in simple French
-- Explain required Arduino IDE libraries
+- Simple, short sentences
 
 ---
 
-## 📝 Git Commits - Conventional Commits
-
-Use the **Conventional Commits** specification for all git commits:
-
-```
-<type>: <short description>
-```
-
-| Type | When to use |
-|------|-------------|
-| `feat` | New feature (new game, new function) |
-| `fix` | Bug fix |
-| `docs` | Documentation changes |
-| `refactor` | Code restructuring (no new features) |
-| `style` | Formatting, comments |
-| `chore` | Build, config, maintenance |
-
-**Examples:**
-- `feat: add Aventurier platform game`
-- `fix: reduce RAM usage in level transitions`
-- `docs: update copilot instructions for multi-game structure`
-
----
-
-## 🎮 Project Structure - Multi-Game Arcade
-
-This project is a **multi-game arcade console** with a menu system.
-
-### Architecture Overview
+## 📁 Project Architecture
 
 ```
 Game/
-├── Game.ino          # Main program - menu & game switching
-├── GameBase.h        # Game states and constants
-├── Display.h         # OLED screen functions
-├── Input.h           # Joystick and button controls
-├── Melodies.h        # Sound effects
-├── Menu.h            # Game selection menu
-├── ProgMem.h         # 💾 Store data in Flash (CRITICAL!)
-├── Procedural.h      # 🎲 Procedural level generation
-├── Physics.h         # 💥 Collision detection & movement
-├── Objects.h         # 📦 Object pools for collectibles/enemies
-├── MonsterHunter.h   # Game 1: Monster Hunter
-└── Aventurier.h      # Game 2: Platform adventure
+├── Game.ino           # Main entry point
+├── GameBase.h         # Game states & structures
+├── Menu.h             # Game selection menu
+│
+├── Display.h          # OLED rendering
+├── Input.h            # Joystick & button
+├── Melodies.h         # Sound effects
+│
+├── ProgMem.h          # Flash memory storage
+├── Procedural.h       # Level generation
+├── Physics.h          # Collision & movement
+├── Objects.h          # Object pools
+│
+├── MonsterHunter.h    # Game: top-view shooter
+└── Aventurier.h       # Game: platformer
 ```
 
-### Reusable Modules
+---
 
-When creating new games, use these existing modules:
+## 🔧 Module Quick Reference
 
-| Module | Key Functions |
-|--------|---------------|
-| **Display.h** | `DESSINER_ECRAN`, `ecrireTexte()`, `dessinerRectangle()`, `dessinerCercle()`, `dessinerLigne()` - See `.github/instructions/display.instructions.md` |
-| **Input.h** | `lireJoystick()`, `boutonJustePresse()`, `joystickHaut()`, `joystickBas()`, `joystickGauche()`, `joystickDroite()` |
-| **Melodies.h** | `melodieStartup()`, `melodieGameOver()`, `melodieTir()` |
-| **ProgMem.h** | `NIVEAU_PROGMEM()`, `CONFIG_PROGMEM()`, `TEXTE_PROGMEM()`, `pm_charger3Colonnes()`, `pm_lireTexte()` |
-| **Procedural.h** | `proc_genererPosition()`, `proc_genererLoinDe()`, `proc_genererPlateformes()`, `proc_calculerDifficulte()` - See `.github/instructions/procedural.instructions.md` |
-| **Physics.h** | `phys_touchePoint()`, `phys_toucheBoite()`, `phys_distance()`, `phys_bougerVers()`, `phys_clamp()` - See `.github/instructions/physics.instructions.md` |
-| **Objects.h** | `obj_creer()`, `obj_supprimer()`, `obj_touchePoint()`, `objm_bougerTous()` - See `.github/instructions/objects.instructions.md` |
+| Module | Purpose | Documentation |
+|--------|---------|---------------|
+| **Display.h** | OLED screen rendering | [display.instructions.md](instructions/display.instructions.md) |
+| **Input.h** | Joystick and button input | See below |
+| **ProgMem.h** | Store data in Flash | [memory.instructions.md](instructions/memory.instructions.md) |
+| **Procedural.h** | Generate levels/positions | [procedural.instructions.md](instructions/procedural.instructions.md) |
+| **Physics.h** | Collision and movement | [physics.instructions.md](instructions/physics.instructions.md) |
+| **Objects.h** | Object pool management | [objects.instructions.md](instructions/objects.instructions.md) |
 
-### Game States (defined in GameBase.h)
+### Input.h Functions
 
-| State | Value | Meaning |
-|-------|-------|---------|
-| `ETAT_EN_COURS` | 0 | Game is running |
-| `ETAT_PAUSE` | 1 | Game is paused |
+```cpp
+lireJoystick();           // Update state (call first!)
+joystickHaut();           // Returns true if up
+joystickBas();            // Returns true if down
+joystickGauche();         // Returns true if left
+joystickDroite();         // Returns true if right
+boutonJustePresse();      // Returns true on button press (edge detect)
+```
+
+---
+
+## 🎮 Game States
+
+Defined in `GameBase.h`:
+
+| Constant | Value | Meaning |
+|----------|-------|---------|
+| `ETAT_EN_COURS` | 0 | Game running |
+| `ETAT_PAUSE` | 1 | Game paused |
 | `ETAT_TERMINE` | 2 | Game over |
 | `ETAT_QUITTER` | 3 | Return to menu |
 
 ---
 
-## 🆕 How To Add A New Game
+## 🆕 Creating a New Game
 
-### Step 1: Create the game file
+### Step 1: Create Game File
 
-Create `NewGame.h` in the `Game/` folder with this structure:
+Create `NewGame.h` with this template:
 
 ```cpp
 #ifndef NEWGAME_H
@@ -122,22 +105,21 @@ Create `NewGame.h` in the `Game/` folder with this structure:
 #include "GameBase.h"
 #include "Display.h"
 #include "Input.h"
+#include "Physics.h"
 
-// Game info for menu
-InfoJeu infoNewGame = {
-  "Game Name",
-  "Short description"
-};
+// === GAME INFO ===
+InfoJeu infoNewGame = { "Game Name", "Description" };
 
-// Game variables (use prefix!)
+// === VARIABLES (use prefix!) ===
 int ng_joueurX = 64;
+int ng_joueurY = 32;
 int ng_etatJeu = ETAT_EN_COURS;
 
-// Required functions
-void ng_setupJeu() { /* initialize */ }
-void ng_resetJeu() { /* reset to start */ }
+// === REQUIRED FUNCTIONS ===
+void ng_setupJeu() { /* Initialize */ }
+void ng_resetJeu() { /* Reset to start */ }
 int ng_getEtatJeu() { return ng_etatJeu; }
-void ng_loopJeu() { /* main game loop */ }
+void ng_loopJeu() { /* Main game loop */ }
 
 #endif
 ```
@@ -145,162 +127,78 @@ void ng_loopJeu() { /* main game loop */ }
 ### Step 2: Register in Game.ino
 
 ```cpp
-// At the top
 #include "NewGame.h"
 
-// In setup()
+// In setup():
 menu_ajouterJeu(infoNewGame.nom);
 
-// In lancerJeu()
-if (numeroJeu == X) {
-  ng_resetJeu();
-  ng_setupJeu();
-}
+// In lancerJeu():
+if (numeroJeu == X) { ng_resetJeu(); ng_setupJeu(); }
 
-// In executerJeu()
-if (numeroJeu == X) {
-  ng_loopJeu();
-}
+// In executerJeu():
+if (numeroJeu == X) { ng_loopJeu(); }
 ```
 
 ### Naming Convention
 
-**All game variables and functions MUST use a prefix** to avoid conflicts:
-- Monster Hunter: `mh_` (e.g., `mh_joueurX`, `mh_loopJeu()`)
-- Aventurier: `av_` (e.g., `av_niveau`, `av_dessiner()`)
-- New Game: `ng_` (e.g., `ng_score`, `ng_update()`)
+**All variables and functions MUST use a unique prefix:**
+
+| Game | Prefix | Examples |
+|------|--------|----------|
+| Monster Hunter | `mh_` | `mh_joueurX`, `mh_loopJeu()` |
+| Aventurier | `av_` | `av_niveau`, `av_dessiner()` |
+| New Game | `ng_` | `ng_score`, `ng_update()` |
 
 ---
 
-## ⚠️ CRITICAL: Arduino Memory Constraints
+## ⚠️ Memory Constraints
 
-**See `.github/instructions/memory.instructions.md` for full details!**
+**Arduino Uno limits:**
 
-The Arduino Uno has **very limited memory**:
+| Memory | Total | Safe Limit | Danger Zone |
+|--------|-------|------------|-------------|
+| Flash | 32 KB | < 85% | > 90% |
+| RAM | 2 KB | < 60% | > 65% |
 
-| Memory Type | Total | Safe Usage |
-|-------------|-------|------------|
-| Program (Flash) | 32 KB | < 85% |
-| RAM | 2048 bytes | < 60% |
+**Key rules:**
+1. Maximum **5-6 objects** per array
+2. Use **`int8_t`** for small values
+3. Store constants in **PROGMEM** (Flash)
+4. Keep level transitions **simple**
 
-### Key Rules
+See [memory.instructions.md](instructions/memory.instructions.md) for details.
 
-1. **Maximum 5-6 game objects** - `int plat[5][3]` not `int plat[12][3]`
-2. **Use ProgMem.h** for level data, config, and text strings
-3. **Keep level transitions simple** - one message, short delay
-4. **Use `int8_t`** for small values (niveau, vies, direction)
+---
 
-### Safe Game Template
+## 📝 Git Commits
 
-```cpp
-#define MAX_OBJETS 5
-int objets[MAX_OBJETS][3];
+Use **Conventional Commits**:
 
-void niveauTermine() {
-  DESSINER_ECRAN {
-    ecrireTexte(20, 20, "BRAVO!", 2);
-  }
-  delay(1500);
-  niveau++;
-  creerNiveau();
-}
+```
+<type>: <description>
 ```
 
----
+| Type | Usage |
+|------|-------|
+| `feat` | New feature |
+| `fix` | Bug fix |
+| `docs` | Documentation |
+| `refactor` | Code restructuring |
+| `chore` | Maintenance |
 
-## 💾 ProgMem.h - Store Data in Flash
-
-**See `.github/instructions/memory.instructions.md` for full API reference!**
-
-Store level data and text in Flash (32KB) instead of RAM (2KB):
-
-```cpp
-#include "ProgMem.h"
-
-// Define in PROGMEM (Flash)
-NIVEAU_PROGMEM(gn_niv1, { 0,56,40, 45,46,30, 80,38,25 });
-CONFIG_PROGMEM(gn_vitesse, { 1, 2, 3, 4, 5 });
-TEXTE_PROGMEM(gn_txtBravo, "BRAVO!");
-
-// RAM: only current level
-int gn_plat[3][3];
-
-// Load from PROGMEM when needed
-void gn_creerNiveau() {
-  pm_charger3Colonnes(gn_niv1, gn_plat, 3);
-}
-
-// Read text
-ecrireTexte(10, 10, pm_lireTexte(gn_txtBravo), 2);
-```
+**Examples:**
+- `feat: add Space Invaders game`
+- `fix: reduce RAM in level transitions`
 
 ---
 
-## 🎲 Procedural Generation with Procedural.h
+## 🔌 Hardware Configuration
 
-**See `.github/instructions/procedural.instructions.md` for full API reference!**
-
-For **infinite levels** without memory cost. Works for both platform games AND top-view games!
-
-### Platform Games (Aventurier style)
-
-```cpp
-#include "Procedural.h"
-
-void gn_creerNiveau() {
-  if (gn_niveau <= 3) {
-    pm_charger3Colonnes(gn_niveaux[gn_niveau], gn_plat, 5);
-  } else {
-    // Procedural for level 4+
-    int diff = proc_calculerDifficulte(gn_niveau);
-    proc_genererPlateformes(gn_niveau, gn_plat, 5, diff);
-    proc_genererPorte(gn_plat, 5, &porteX, &porteY);
-  }
-}
-```
-
-### Top-View Games (Monster Hunter style)
-
-```cpp
-#include "Procedural.h"
-
-// Spawn monster far from player
-proc_genererLoinDe(niveau, spawnCounter, &monstreX, &monstreY,
-                   joueurX, joueurY, 40, 10);
-
-// Spawn food anywhere
-proc_genererPosition(niveau, spawnCounter, &foodX, &foodY, 10);
-```
-
----
-
-## 🔧 Debugging Black Screen Crashes
-
-**See `.github/instructions/memory.instructions.md` for full debugging guide!**
-
-When the screen goes black, the program crashed. Test incrementally:
-
-1. Disable new game → Does menu work?
-2. Add to menu with simple loop → Setup OK?
-3. Add drawing → Drawing OK?
-4. Add controls + physics → Logic OK?
-5. Add level transitions → **Usually crashes here!**
-
-**The crash happens in the LAST feature you added.**
-
----
-
-## 🔌 Hardware Setup
-
-For breadboard diagrams and component placement, see the instructions in
-`.github/instructions/components.instructions.md`.
-
-### Current Hardware Configuration
-
-| Component | Arduino Pin | Purpose |
-|-----------|-------------|---------|
-| OLED Display | SDA (A4), SCL (A5) | Game display |
-| Joystick X | A0 | Horizontal movement |
-| Joystick Y | A1 | Vertical movement |
-| Joystick Button | D2 | Action button |
-| Buzzer | D8 | Sound effects |
+| Component | Pin | Purpose |
+|-----------|-----|---------|
+| OLED SDA | A4 | I2C Data |
+| OLED SCL | A5 | I2C Clock |
+| Joystick X | A0 | Horizontal |
+| Joystick Y | A1 | Vertical |
+| Joystick Button | D2 | Action |
+| Buzzer | D8 | Sound |
