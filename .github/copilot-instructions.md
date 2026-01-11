@@ -48,6 +48,7 @@ Game/
 ├── Procedural.h       # Level generation
 ├── Physics.h          # Collision & movement
 ├── Objects.h          # Object pools
+├── Personnages.h      # Character system
 │
 ├── MonsterHunter.h    # Game: top-view shooter
 └── Aventurier.h       # Game: platformer
@@ -57,25 +58,30 @@ Game/
 
 ## 🔧 Module Quick Reference
 
+### Core System
+
+| Module | Purpose | Documentation |
+|--------|---------|---------------|
+| **GameBase.h** | Game states & structure | [gamebase.instructions.md](instructions/gamebase.instructions.md) |
+| **Menu.h** | Game selection menu | [menu.instructions.md](instructions/menu.instructions.md) |
+
+### Hardware Interface
+
 | Module | Purpose | Documentation |
 |--------|---------|---------------|
 | **Display.h** | OLED screen rendering | [display.instructions.md](instructions/display.instructions.md) |
-| **Input.h** | Joystick and button input | See below |
+| **Input.h** | Joystick and button | [input.instructions.md](instructions/input.instructions.md) |
+| **Melodies.h** | Sound effects | [melodies.instructions.md](instructions/melodies.instructions.md) |
+
+### Game Utilities
+
+| Module | Purpose | Documentation |
+|--------|---------|---------------|
 | **ProgMem.h** | Store data in Flash | [memory.instructions.md](instructions/memory.instructions.md) |
 | **Procedural.h** | Generate levels/positions | [procedural.instructions.md](instructions/procedural.instructions.md) |
 | **Physics.h** | Collision and movement | [physics.instructions.md](instructions/physics.instructions.md) |
 | **Objects.h** | Object pool management | [objects.instructions.md](instructions/objects.instructions.md) |
-
-### Input.h Functions
-
-```cpp
-lireJoystick();           // Update state (call first!)
-joystickHaut();           // Returns true if up
-joystickBas();            // Returns true if down
-joystickGauche();         // Returns true if left
-joystickDroite();         // Returns true if right
-boutonJustePresse();      // Returns true on button press (edge detect)
-```
+| **Personnages.h** | Character system | [personnages.instructions.md](instructions/personnages.instructions.md) |
 
 ---
 
@@ -200,5 +206,5 @@ Use **Conventional Commits**:
 | OLED SCL | A5 | I2C Clock |
 | Joystick X | A0 | Horizontal |
 | Joystick Y | A1 | Vertical |
-| Joystick Button | D2 | Action |
+| Joystick Button | D7 | Action |
 | Buzzer | D8 | Sound |
