@@ -10,9 +10,11 @@
 #include "Display.h"
 #include "Input.h"
 #include "Melodies.h"
-#include "ProgMem.h"    // Pour stocker niveaux en Flash!
-#include "Procedural.h" // Pour niveaux infinis!
-#include "Physics.h"    // Pour collision!
+#include "ProgMem.h"     // Pour stocker niveaux en Flash!
+#include "Procedural.h"  // Pour niveaux infinis!
+#include "Physics.h"     // Pour collision!
+#include "Objects.h"     // Pour gérer les plateformes!
+#include "Personnages.h" // Pour dessiner le joueur!
 
 // ==========================================================
 // INFORMATIONS DU JEU (Game information)
@@ -41,12 +43,16 @@ int av_joueurY = 48;
 int av_vitesseY = 0;
 bool av_auSol = true;
 
+// Direction du joueur (Player direction)
+int av_direction = DIR_DROITE;
+
 // Animation
 int av_frame = 0;
 bool av_bouge = false;
 
-// Plateformes: x, y, largeur (Platforms: x, y, width)
-int av_plat[AV_MAX_PLATEFORMES][3];
+// Plateformes avec ObjetSimple (Platforms using ObjetSimple)
+// Utilise le champ largeur pour la largeur de plateforme!
+ObjetSimple av_plat[AV_MAX_PLATEFORMES];
 int av_nbPlat = 0;
 
 // Porte (Door)
@@ -120,27 +126,40 @@ void av_creerNiveau() {
   // Niveaux 5+: générés procéduralement (infinite!)
   
   if (av_niveau == 1) {
-    pm_chargerNiveau(av_niv1_plat, av_plat, 5);
+    obj_chargerPlateformes(av_niv1_plat, av_plat, 5);
     pm_chargerPorte(av_niv1_porte, &av_porteX, &av_porteY);
   }
   else if (av_niveau == 2) {
-    pm_chargerNiveau(av_niv2_plat, av_plat, 5);
+    obj_chargerPlateformes(av_niv2_plat, av_plat, 5);
     pm_chargerPorte(av_niv2_porte, &av_porteX, &av_porteY);
   }
   else if (av_niveau == 3) {
-    pm_chargerNiveau(av_niv3_plat, av_plat, 5);
+    obj_chargerPlateformes(av_niv3_plat, av_plat, 5);
     pm_chargerPorte(av_niv3_porte, &av_porteX, &av_porteY);
   }
   else if (av_niveau == 4) {
-    pm_chargerNiveau(av_niv4_plat, av_plat, 5);
+    obj_chargerPlateformes(av_niv4_plat, av_plat, 5);
     pm_chargerPorte(av_niv4_porte, &av_porteX, &av_porteY);
   }
   else {
-    // Niveau 5+: génération procédurale!
-    // (Level 5+: procedural generation!)
+    // Niveau 5+: génération procédurale avec ObjetSimple!
+    // (Level 5+: procedural generation with ObjetSimple!)
     int difficulte = proc_calculerDifficulte(av_niveau);
-    proc_genererPlateformes(av_niveau, av_plat, 5, difficulte);
-    proc_genererPorte(av_plat, 5, &av_porteX, &av_porteY);
+    
+    // Générer dans tableau temporaire puis copier
+    int tempPlat[5][3];
+    proc_genererPlateformes(av_niveau, tempPlat, 5, difficulte);
+    
+    // Copier vers ObjetSimple
+    for (int i = 0; i < 5; i++) {
+      av_plat[i].x = tempPlat[i][0];
+      av_plat[i].y = tempPlat[i][1];
+      av_plat[i].largeur = tempPlat[i][2];
+      av_plat[i].type = 1;
+      av_plat[i].actif = true;
+    }
+    
+    proc_genererPorte(tempPlat, 5, &av_porteX, &av_porteY);
   }
 }
 
@@ -151,20 +170,8 @@ void av_creerNiveau() {
 bool av_surPlateforme() {
   int piedY = av_joueurY + 6;
   
-  for (int i = 0; i < av_nbPlat; i++) {
-    int px = av_plat[i][0];
-    int py = av_plat[i][1];
-    int pl = av_plat[i][2];
-    
-    if (av_joueurX >= px - 3 && av_joueurX <= px + pl + 3) {
-      if (piedY >= py - 2 && piedY <= py + 5) {
-        if (av_vitesseY >= 0) {
-          return true;
-        }
-      }
-    }
-  }
-  return false;
+  // Utilise obj_surPlateforme de Objects.h!
+  return obj_surPlateforme(av_plat, av_nbPlat, av_joueurX, piedY, av_vitesseY) >= 0;
 }
 
 void av_physique() {
@@ -199,11 +206,13 @@ void av_controles() {
     av_joueurX = av_joueurX - 2;
     av_bouge = true;
     av_frame = 1 - av_frame;
+    av_direction = DIR_GAUCHE;
   }
   if (joystickDroite()) {
     av_joueurX = av_joueurX + 2;
     av_bouge = true;
     av_frame = 1 - av_frame;
+    av_direction = DIR_DROITE;
   }
   
   // Limites écran (Screen limits)
@@ -220,43 +229,29 @@ void av_controles() {
 // ==========================================================
 // DESSIN (Drawing)
 // ==========================================================
-
-void av_dessinerBonhomme(int x, int y) {
-  // Tête (Head)
-  dessinerCercle(x, y - 6, 3);
-  // Corps (Body)
-  dessinerRectangle(x - 2, y - 2, 4, 5);
-  
-  // Jambes animées (Animated legs)
-  if (av_bouge && av_frame == 0) {
-    dessinerLigne(x - 1, y + 3, x - 3, y + 7);
-    dessinerLigne(x + 1, y + 3, x + 3, y + 7);
-  } else {
-    dessinerLigne(x - 1, y + 3, x - 2, y + 7);
-    dessinerLigne(x + 1, y + 3, x + 2, y + 7);
-  }
-  
-  // Bras (Arms)
-  dessinerLigne(x - 2, y - 1, x - 4, y + 2);
-  dessinerLigne(x + 2, y - 1, x + 4, y + 2);
-}
+// Utilise Personnages.h pour dessiner le joueur!
+// (Uses Personnages.h to draw the player!)
 
 // Dessiner le contenu du jeu (Draw game content) - appelé dans la boucle page
 void av_dessinerContenu() {
   // Score (Score)
   ecrireTexteNombre(0, 0, "Niv ", av_niveau, 1);
   
-  // Plateformes (Platforms)
+  // Plateformes avec ObjetSimple (Platforms with ObjetSimple)
   for (int i = 0; i < av_nbPlat; i++) {
-    dessinerRectangle(av_plat[i][0], av_plat[i][1], av_plat[i][2], 4);
+    if (av_plat[i].actif) {
+      dessinerRectangle(av_plat[i].x, av_plat[i].y, av_plat[i].largeur, 4);
+    }
   }
   
   // Porte (Door)
   dessinerContour(av_porteX - 4, av_porteY, 8, 14);
   dessinerCercle(av_porteX + 1, av_porteY + 7, 1);
   
-  // Joueur (Player)
-  av_dessinerBonhomme(av_joueurX, av_joueurY);
+  // Joueur - utilise Personnages.h vue plateforme!
+  // (Player - uses Personnages.h platform view!)
+  pers_dessinerPlateforme(av_joueurX, av_joueurY, personnageActuel, 
+                          av_direction, av_bouge ? av_frame : 0);
 }
 
 void av_dessiner() {
@@ -307,6 +302,7 @@ void av_resetJeu() {
   av_joueurX = 20;
   av_joueurY = 48;
   av_vitesseY = 0;
+  av_direction = DIR_DROITE;
   av_niveau = 1;
   av_etoiles = 0;
   av_nbPlat = 0;

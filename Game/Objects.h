@@ -27,12 +27,15 @@
 // ==========================================================
 // STRUCTURE OBJET SIMPLE (Simple object structure)
 // ==========================================================
-// Un objet = position + état actif
-// Coût: 5 octets par objet (5 bytes per object)
+// Un objet = position + dimensions + état actif
+// Coût: 6 octets par objet (6 bytes per object)
+// Pour: plateformes, collectibles, obstacles
+// (For: platforms, collectibles, obstacles)
 
 struct ObjetSimple {
   int8_t x;       // Position X (0-127)
   int8_t y;       // Position Y (0-63)
+  int8_t largeur; // Largeur (Width) - pour plateformes
   int8_t type;    // Type d'objet (0 = inactif, 1+ = type)
   bool actif;     // Est visible/actif? (Is visible/active?)
 };
@@ -40,14 +43,18 @@ struct ObjetSimple {
 // ==========================================================
 // STRUCTURE OBJET MOBILE (Moving object structure)
 // ==========================================================
-// Objet avec vitesse - pour balles, ennemis qui bougent
-// Coût: 7 octets par objet (7 bytes per object)
+// Objet avec vitesse - pour balles, ennemis, joueur
+// Coût: 9 octets par objet (9 bytes per object)
+// Pour: projectiles, ennemis, joueur vue de dessus
+// (For: projectiles, enemies, top-view player)
 
 struct ObjetMobile {
   int8_t x;       // Position X
   int8_t y;       // Position Y
   int8_t vx;      // Vitesse X (velocity X)
   int8_t vy;      // Vitesse Y (velocity Y)
+  int8_t largeur; // Largeur/taille (Width/size)
+  int8_t param;   // Paramètre extra: HP, direction, etc.
   int8_t type;    // Type d'objet (0 = inactif)
   bool actif;     // Est visible/actif?
 };
@@ -62,6 +69,7 @@ inline void obj_initialiser(ObjetSimple* pool, int taille) {
   for (int i = 0; i < taille; i++) {
     pool[i].x = 0;
     pool[i].y = 0;
+    pool[i].largeur = 0;
     pool[i].type = 0;
     pool[i].actif = false;
   }
@@ -88,12 +96,14 @@ inline int obj_trouverLibre(ObjetSimple* pool, int taille) {
 
 // Créer un objet à position donnée (Create object at given position)
 // Retourne l'index, ou -1 si pool plein
+// largeur: pour plateformes/hitbox (0 = point)
 inline int obj_creer(ObjetSimple* pool, int taille, 
-                     int x, int y, int type) {
+                     int x, int y, int largeur, int type) {
   int index = obj_trouverLibre(pool, taille);
   if (index >= 0) {
     pool[index].x = x;
     pool[index].y = y;
+    pool[index].largeur = largeur;
     pool[index].type = type;
     pool[index].actif = true;
   }
@@ -102,6 +112,7 @@ inline int obj_creer(ObjetSimple* pool, int taille,
 
 // Créer à position procédurale (Create at procedural position)
 // Utilise Procedural.h pour générer la position
+// Pour collectibles simples (largeur = 0)
 inline int obj_creerProc(ObjetSimple* pool, int taille,
                          int seed, int index, int type, int marge) {
   int slot = obj_trouverLibre(pool, taille);
@@ -110,6 +121,7 @@ inline int obj_creerProc(ObjetSimple* pool, int taille,
     proc_genererPosition(seed, index, &px, &py, marge);
     pool[slot].x = px;
     pool[slot].y = py;
+    pool[slot].largeur = 0;
     pool[slot].type = type;
     pool[slot].actif = true;
   }
@@ -176,6 +188,8 @@ inline void objm_initialiser(ObjetMobile* pool, int taille) {
     pool[i].y = 0;
     pool[i].vx = 0;
     pool[i].vy = 0;
+    pool[i].largeur = 0;
+    pool[i].param = 0;
     pool[i].type = 0;
     pool[i].actif = false;
   }
@@ -191,14 +205,18 @@ inline int objm_trouverLibre(ObjetMobile* pool, int taille) {
 
 // Créer objet mobile (Create moving object)
 // Parfait pour: balles, ennemis avec direction
+// largeur: taille hitbox, param: HP/direction/etc
 inline int objm_creer(ObjetMobile* pool, int taille,
-                      int x, int y, int vx, int vy, int type) {
+                      int x, int y, int vx, int vy, 
+                      int largeur, int param, int type) {
   int index = objm_trouverLibre(pool, taille);
   if (index >= 0) {
     pool[index].x = x;
     pool[index].y = y;
     pool[index].vx = vx;
     pool[index].vy = vy;
+    pool[index].largeur = largeur;
+    pool[index].param = param;
     pool[index].type = type;
     pool[index].actif = true;
   }
@@ -258,6 +276,67 @@ inline int objm_touchePoint(ObjetMobile* pool, int taille,
     if (pool[i].actif) {
       if (phys_touchePoint(pool[i].x, pool[i].y, x, y, distance)) {
         return i;
+      }
+    }
+  }
+  return -1;
+}
+
+// ==========================================================
+// FONCTIONS POUR PLATEFORMES (Platform functions)
+// ==========================================================
+// Pour les jeux de plateforme comme Aventurier
+// (For platform games like Aventurier)
+
+// Charger plateformes depuis PROGMEM vers pool ObjetSimple
+// Source: tableau PROGMEM [n][3] = {x, y, largeur}
+// (Load platforms from PROGMEM to ObjetSimple pool)
+inline void obj_chargerPlateformes(const uint8_t* source, 
+                                    ObjetSimple* pool, int taille) {
+  for (int i = 0; i < taille; i++) {
+    int base = i * 3;
+    pool[i].x = pgm_read_byte(&source[base]);
+    pool[i].y = pgm_read_byte(&source[base + 1]);
+    pool[i].largeur = pgm_read_byte(&source[base + 2]);
+    pool[i].type = 1;  // Type plateforme
+    pool[i].actif = true;
+  }
+}
+
+// Vérifier collision rectangle avec un pool de plateformes
+// Parfait pour: atterrissage joueur sur plateforme
+// (Check rectangle collision with platform pool)
+// Retourne l'index de la plateforme touchée, ou -1
+inline int obj_touchePlateforme(ObjetSimple* pool, int taille,
+                                 int x, int y, int largeurObjet, int hauteurObjet) {
+  for (int i = 0; i < taille; i++) {
+    if (pool[i].actif) {
+      // Collision box: plateforme a une hauteur fixe de 4 pixels
+      if (phys_toucheBoite(x, y, largeurObjet, hauteurObjet,
+                           pool[i].x, pool[i].y, pool[i].largeur, 4)) {
+        return i;
+      }
+    }
+  }
+  return -1;
+}
+
+// Vérifier si un point est au-dessus d'une plateforme
+// (Check if a point is above a platform - for landing)
+inline int obj_surPlateforme(ObjetSimple* pool, int taille,
+                              int x, int piedY, int vitesseY) {
+  for (int i = 0; i < taille; i++) {
+    if (pool[i].actif) {
+      int px = pool[i].x;
+      int py = pool[i].y;
+      int pl = pool[i].largeur;
+      
+      if (x >= px - 3 && x <= px + pl + 3) {
+        if (piedY >= py - 2 && piedY <= py + 5) {
+          if (vitesseY >= 0) {
+            return i;  // Sur cette plateforme!
+          }
+        }
       }
     }
   }

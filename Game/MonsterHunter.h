@@ -13,9 +13,10 @@
 #include "Display.h"
 #include "Input.h"
 #include "Melodies.h"
-#include "ProgMem.h"    // Pour stocker config en Flash!
+#include "ProgMem.h"     // Pour stocker config en Flash!
 #include "Procedural.h"  // Pour génération procédurale!
 #include "Physics.h"     // Pour collision et distance!
+#include "Personnages.h" // Pour dessiner le joueur!
 
 // ==========================================================
 // INFORMATIONS DU JEU (Game information)
@@ -118,7 +119,10 @@ int mh_joueurX = 64;
 int mh_joueurY = 32;
 int mh_tailleJoueur = 6;
 
-// Dernière direction du joueur (Last player direction)
+// Direction du joueur pour vue de dessus (Player direction for top-view)
+int mh_direction = DIR_DROITE;
+
+// Dernière direction du joueur pour le tir (Last player direction for shooting)
 int mh_derniereDirectionX = 1;
 int mh_derniereDirectionY = 0;
 
@@ -358,8 +362,10 @@ void mh_dessinerContenu() {
   // Ligne sous le score (Line under score)
   dessinerLigne(0, 9, 127, 9);
   
-  // Joueur (Player)
-  dessinerRectangle(mh_joueurX, mh_joueurY, mh_tailleJoueur, mh_tailleJoueur);
+  // Joueur - utilise Personnages.h vue de dessus!
+  // (Player - uses Personnages.h top-view!)
+  pers_dessinerVueHaut(mh_joueurX, mh_joueurY, mh_tailleJoueur, 
+                       personnageActuel, mh_direction);
   
   // Nourriture (Food)
   dessinerCercle(mh_nourritureX, mh_nourritureY, mh_tailleNourriture / 2);
@@ -427,6 +433,7 @@ void mh_setupJeu() {
 void mh_resetJeu() {
   mh_joueurX = 64;
   mh_joueurY = 32;
+  mh_direction = DIR_DROITE;
   mh_derniereDirectionX = 1;
   mh_derniereDirectionY = 0;
   mh_score = 0;
@@ -470,21 +477,25 @@ void mh_loopJeu() {
     mh_joueurX = mh_joueurX - mh_vitesseJoueur;
     mh_derniereDirectionX = -1;
     mh_derniereDirectionY = 0;
+    mh_direction = DIR_GAUCHE;
   }
   if (joystickDroite()) {
     mh_joueurX = mh_joueurX + mh_vitesseJoueur;
     mh_derniereDirectionX = 1;
     mh_derniereDirectionY = 0;
+    mh_direction = DIR_DROITE;
   }
   if (joystickHaut()) {
     mh_joueurY = mh_joueurY - mh_vitesseJoueur;
     mh_derniereDirectionY = -1;
     mh_derniereDirectionX = 0;
+    mh_direction = DIR_HAUT;
   }
   if (joystickBas()) {
     mh_joueurY = mh_joueurY + mh_vitesseJoueur;
     mh_derniereDirectionY = 1;
     mh_derniereDirectionX = 0;
+    mh_direction = DIR_BAS;
   }
   
   // Garder le joueur dans l'écran (Keep player on screen)
