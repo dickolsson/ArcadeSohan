@@ -28,19 +28,20 @@ document.addEventListener('DOMContentLoaded', function() {
     menuToggle.addEventListener('click', toggleMenu);
     menuToggle.addEventListener('touchstart', toggleMenu, { passive: false });
     
-    // Close menu when clicking a link
+    // Close menu when clicking a link - only use 'click' event to allow navigation
     const links = navLinks.querySelectorAll('a');
     links.forEach(link => {
-      const closeMenu = () => {
-        menuToggle.classList.remove('active');
-        navLinks.classList.remove('active');
-        if (menuOverlay) {
-          menuOverlay.classList.remove('active');
-        }
-        document.body.style.overflow = '';
-      };
-      link.addEventListener('click', closeMenu);
-      link.addEventListener('touchstart', closeMenu);
+      link.addEventListener('click', (e) => {
+        // Let the link navigate, then close menu after a tiny delay
+        setTimeout(() => {
+          menuToggle.classList.remove('active');
+          navLinks.classList.remove('active');
+          if (menuOverlay) {
+            menuOverlay.classList.remove('active');
+          }
+          document.body.style.overflow = '';
+        }, 100);
+      });
     });
     
     // Close menu when clicking overlay
