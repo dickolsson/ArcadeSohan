@@ -9,30 +9,67 @@ document.addEventListener('DOMContentLoaded', function() {
   // === MENU MOBILE (Mobile hamburger menu) ===
   const menuToggle = document.getElementById('menu-toggle');
   const navLinks = document.getElementById('nav-links');
+  const menuOverlay = document.getElementById('menu-overlay');
   
   if (menuToggle && navLinks) {
-    // Toggle menu on hamburger click
-    menuToggle.addEventListener('click', () => {
+    // Toggle menu on hamburger click (support touch and click)
+    const toggleMenu = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
       menuToggle.classList.toggle('active');
       navLinks.classList.toggle('active');
-    });
+      if (menuOverlay) {
+        menuOverlay.classList.toggle('active');
+      }
+      // Prevent body scroll when menu is open
+      document.body.style.overflow = navLinks.classList.contains('active') ? 'hidden' : '';
+    };
+    
+    menuToggle.addEventListener('click', toggleMenu);
+    menuToggle.addEventListener('touchstart', toggleMenu, { passive: false });
     
     // Close menu when clicking a link
     const links = navLinks.querySelectorAll('a');
     links.forEach(link => {
-      link.addEventListener('click', () => {
+      const closeMenu = () => {
         menuToggle.classList.remove('active');
         navLinks.classList.remove('active');
-      });
+        if (menuOverlay) {
+          menuOverlay.classList.remove('active');
+        }
+        document.body.style.overflow = '';
+      };
+      link.addEventListener('click', closeMenu);
+      link.addEventListener('touchstart', closeMenu);
     });
     
+    // Close menu when clicking overlay
+    if (menuOverlay) {
+      const closeOnOverlay = (e) => {
+        e.preventDefault();
+        menuToggle.classList.remove('active');
+        navLinks.classList.remove('active');
+        menuOverlay.classList.remove('active');
+        document.body.style.overflow = '';
+      };
+      menuOverlay.addEventListener('click', closeOnOverlay);
+      menuOverlay.addEventListener('touchstart', closeOnOverlay);
+    }
+    
     // Close menu when clicking outside
-    document.addEventListener('click', (e) => {
+    const closeOnOutside = (e) => {
       if (!menuToggle.contains(e.target) && !navLinks.contains(e.target)) {
         menuToggle.classList.remove('active');
         navLinks.classList.remove('active');
+        if (menuOverlay) {
+          menuOverlay.classList.remove('active');
+        }
+        document.body.style.overflow = '';
       }
-    });
+    };
+    
+    document.addEventListener('click', closeOnOutside);
+    document.addEventListener('touchstart', closeOnOutside);
   }
   
   // === SMOOTH SCROLL FOR ANCHOR LINKS (Défilement fluide) ===
