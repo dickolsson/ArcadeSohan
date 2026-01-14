@@ -1,5 +1,7 @@
 # 🎮 Arcade Console Sohan
 
+[![Deploy Website](https://github.com/dickolsson/ArcadeSohan/actions/workflows/deploy-website.yml/badge.svg)](https://github.com/dickolsson/ArcadeSohan/actions/workflows/deploy-website.yml)
+
 **A multi-game retro arcade console running on Arduino Uno!** Built to teach a 10-year-old about electronics and programming. 🚀
 
 ## 🕹️ What is this?
