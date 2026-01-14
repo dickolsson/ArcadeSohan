@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🕹️ Les Jeux - Arcade Sohan</title>
+  <meta name="description" content="Découvre tous les jeux disponibles sur Arcade Sohan!">
+  <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Navigation (Navigation) -->
+  <header>
+    <nav class="navbar">
+      <div class="container">
+        <div class="logo glow-text">🎮 ARCADE SOHAN</div>
+        <ul class="nav-links">
+          <li><a href="index.html">Accueil</a></li>
+          <li><a href="games.html" class="active">Les Jeux</a></li>
+          <li><a href="about.html">À Propos</a></li>
+          <li><a href="sohan.html">Sohan</a></li>
+        </ul>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Page Header (En-tête de page) -->
+    <section class="page-header">
+      <div class="container">
+        <h1 class="glow-text">🕹️ Les Jeux</h1>
+        <p>Découvre tous les jeux disponibles et comment ils fonctionnent!</p>
+      </div>
+    </section>
+
+    <!-- Games Grid (Grille des jeux) -->
+    <section class="games-list">
+      <div class="container">
+        <h2 class="section-title">🎮 Jeux Disponibles</h2>
+        
+        <div class="game-grid">
+          <!-- Monster Hunter -->
+          <div class="game-card game-card-clickable">
+            <div class="game-header">
+              <span class="game-icon">👾</span>
+              <h3>Monster Hunter</h3>
+            </div>
+            <p class="game-description">
+              Chasse les monstres et mange la nourriture! Un jeu d'action rapide 
+              en vue du dessus avec des boss épiques.
+            </p>
+            <div class="game-tags">
+              <span class="tag tag-action">Action</span>
+              <span class="tag tag-topdown">Vue du dessus</span>
+              <span class="tag tag-shooting">Tir</span>
+            </div>
+            <a href="monster-hunter.html" class="btn-arcade btn-primary">Voir les détails →</a>
+          </div>
+
+          <!-- Aventurier -->
+          <div class="game-card game-card-clickable">
+            <div class="game-header">
+              <span class="game-icon">🏃</span>
+              <h3>Aventurier</h3>
+            </div>
+            <p class="game-description">
+              Saute de plateforme en plateforme pour atteindre la porte! 
+              Un jeu de plateforme avec gravité et physique réaliste.
+            </p>
+            <div class="game-tags">
+              <span class="tag tag-platform">Plateforme</span>
+              <span class="tag tag-puzzle">Puzzle</span>
+              <span class="tag tag-physics">Physique</span>
+            </div>
+            <a href="aventurier.html" class="btn-arcade btn-primary">Voir les détails →</a>
+          </div>
+
+          <!-- Breakout -->
+          <div class="game-card game-card-clickable">
+            <div class="game-header">
+              <span class="game-icon">🧱</span>
+              <h3>Breakout</h3>
+            </div>
+            <p class="game-description">
+              Casse toutes les briques avec la balle! Le classique jeu de casse-briques 
+              avec des niveaux de difficulté croissante.
+            </p>
+            <div class="game-tags">
+              <span class="tag tag-arcade">Arcade</span>
+              <span class="tag tag-classic">Classique</span>
+              <span class="tag tag-reflexes">Réflexes</span>
+            </div>
+            <a href="breakout.html" class="btn-arcade btn-primary">Voir les détails →</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Common Systems Link (Lien vers systèmes communs) -->
+    <section class="common-systems-preview">
+      <div class="container">
+        <div class="cta-box">
+          <h2>🔧 Systèmes Communs</h2>
+          <p>Découvre les modules partagés par tous les jeux : Display, Input, Physics, Objects, et plus!</p>
+          <a href="common-systems.html" class="btn-arcade btn-large">Voir les systèmes communs →</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quick Stats (Statistiques rapides) -->
+    <section class="quick-stats">
+      <div class="container">
+        <h2 class="section-title">📊 En Résumé</h2>
+        
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-number">3</div>
+            <div class="stat-label">Jeux Complets</div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-number">8</div>
+            <div class="stat-label">Modules Réutilisables</div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-number">~28KB</div>
+            <div class="stat-label">Code Flash</div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-number">~1.1KB</div>
+            <div class="stat-label">RAM Utilisée</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer (Pied de page) -->
+  <footer>
+    <div class="container">
+      <p>🎮 Arcade Sohan - Projet Arduino par Sohan</p>
+      <p class="footer-links">
+        <a href="index.html">Accueil</a> · 
+        <a href="about.html">À Propos</a> · 
+        <a href="sohan.html">Sohan</a> · 
+        <a href="https://github.com" target="_blank">Code Source</a>
+      </p>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

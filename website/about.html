@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>⚙️ À Propos - Arcade Sohan</title>
+  <meta name="description" content="Découvre comment fonctionne la console Arcade Sohan avec Arduino!">
+  <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Navigation (Navigation) -->
+  <header>
+    <nav class="navbar">
+      <div class="container">
+        <div class="logo glow-text">🎮 ARCADE SOHAN</div>
+        <ul class="nav-links">
+          <li><a href="index.html">Accueil</a></li>
+          <li><a href="games.html">Les Jeux</a></li>
+          <li><a href="about.html" class="active">À Propos</a></li>
+          <li><a href="sohan.html">Sohan</a></li>
+        </ul>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Page Header (En-tête de page) -->
+    <section class="page-header">
+      <div class="container">
+        <h1 class="glow-text">⚙️ À Propos</h1>
+        <p>Comment fonctionne la console Arcade Sohan</p>
+      </div>
+    </section>
+
+    <!-- Project Overview (Vue d'ensemble) -->
+    <section class="about-section">
+      <div class="container">
+        <div class="about-card">
+          <h2>🎮 Le Projet</h2>
+          <p>
+            <strong>Arcade Sohan</strong> est une console de jeux faite maison construite 
+            avec un Arduino Uno, un écran OLED, un joystick et un buzzer. Ce projet 
+            éducatif enseigne l'électronique et la programmation à travers la création 
+            de jeux vidéo rétro!
+          </p>
+          <p>
+            Conçu pour un étudiant de 10 ans, le projet combine des concepts simples 
+            avec des résultats impressionnants. Chaque module est documenté en français 
+            et anglais pour faciliter l'apprentissage.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Hardware Components (Composants hardware) -->
+    <section class="hardware-section">
+      <div class="container">
+        <h2 class="section-title">🔌 Composants Hardware</h2>
+        
+        <div class="components-grid">
+          <div class="component-card">
+            <div class="component-icon">🖥️</div>
+            <h3>Arduino Uno</h3>
+            <p><strong>Microcontrôleur principal</strong></p>
+            <ul>
+              <li>32 KB Flash (code)</li>
+              <li>2 KB RAM (variables)</li>
+              <li>16 MHz</li>
+              <li>Programmé en C++</li>
+            </ul>
+          </div>
+
+          <div class="component-card">
+            <div class="component-icon">📺</div>
+            <h3>Écran OLED I2C</h3>
+            <p><strong>Affichage 0.96"</strong></p>
+            <ul>
+              <li>128×64 pixels</li>
+              <li>Monochrome (blanc)</li>
+              <li>Interface I2C (2 fils)</li>
+              <li>Pins: SDA (A4), SCL (A5)</li>
+            </ul>
+          </div>
+
+          <div class="component-card">
+            <div class="component-icon">🕹️</div>
+            <h3>Joystick Module</h3>
+            <p><strong>Contrôle 2 axes + bouton</strong></p>
+            <ul>
+              <li>Axe X: Pin A0 (0-1023)</li>
+              <li>Axe Y: Pin A1 (0-1023)</li>
+              <li>Bouton: Pin D7</li>
+              <li>Centre ~512 pour X et Y</li>
+            </ul>
+          </div>
+
+          <div class="component-card">
+            <div class="component-icon">🔊</div>
+            <h3>Buzzer Passif</h3>
+            <p><strong>Sons et mélodies</strong></p>
+            <ul>
+              <li>Pin D8</li>
+              <li>Nécessite signal PWM</li>
+              <li>Fonction <code>tone()</code></li>
+              <li>Fréquences 100-5000Hz</li>
+            </ul>
+          </div>
+
+          <div class="component-card">
+            <div class="component-icon">🔋</div>
+            <h3>Alimentation</h3>
+            <p><strong>USB ou batterie</strong></p>
+            <ul>
+              <li>5V via USB</li>
+              <li>ou batterie 9V</li>
+              <li>Consommation ~100mA</li>
+              <li>Portable!</li>
+            </ul>
+          </div>
+
+          <div class="component-card">
+            <div class="component-icon">🔌</div>
+            <h3>Breadboard</h3>
+            <p><strong>Prototype sans soudure</strong></p>
+            <ul>
+              <li>830 points de connexion</li>
+              <li>Rails d'alimentation</li>
+              <li>Facile à modifier</li>
+              <li>Idéal pour apprendre</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Wiring Diagram (Schéma de câblage) -->
+    <section class="wiring-section">
+      <div class="container">
+        <h2 class="section-title">🔧 Configuration des Pins</h2>
+        
+        <div class="wiring-table-container">
+          <table class="wiring-table">
+            <thead>
+              <tr>
+                <th>Composant</th>
+                <th>Pin Arduino</th>
+                <th>Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>OLED SDA</td>
+                <td><strong>A4</strong></td>
+                <td>I2C Data</td>
+                <td>Données I2C pour l'écran</td>
+              </tr>
+              <tr>
+                <td>OLED SCL</td>
+                <td><strong>A5</strong></td>
+                <td>I2C Clock</td>
+                <td>Horloge I2C pour l'écran</td>
+              </tr>
+              <tr>
+                <td>Joystick X</td>
+                <td><strong>A0</strong></td>
+                <td>Analog Input</td>
+                <td>Mouvement horizontal (0-1023)</td>
+              </tr>
+              <tr>
+                <td>Joystick Y</td>
+                <td><strong>A1</strong></td>
+                <td>Analog Input</td>
+                <td>Mouvement vertical (0-1023)</td>
+              </tr>
+              <tr>
+                <td>Joystick Button</td>
+                <td><strong>D7</strong></td>
+                <td>Digital Input</td>
+                <td>Bouton d'action (pull-up)</td>
+              </tr>
+              <tr>
+                <td>Buzzer</td>
+                <td><strong>D8</strong></td>
+                <td>Digital Output</td>
+                <td>Signal PWM pour le son</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="wiring-note">
+          <p>💡 <strong>Note:</strong> L'écran OLED fonctionne à 3.3V mais a un régulateur intégré, 
+          il peut donc être alimenté en 5V depuis l'Arduino.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Software Architecture (Architecture logicielle) -->
+    <section class="architecture-section">
+      <div class="container">
+        <h2 class="section-title">💻 Architecture Logicielle</h2>
+        
+        <div class="architecture-card">
+          <h3>📁 Structure du Code</h3>
+          <p>Le code est organisé en modules .h pour faciliter la maintenance:</p>
+          
+          <div class="file-tree">
+            <div class="file-tree-item">📂 Game/</div>
+            <div class="file-tree-item level-1">├─ 📄 Game.ino <span class="file-desc">Point d'entrée principal</span></div>
+            <div class="file-tree-item level-1">├─ 📄 GameBase.h <span class="file-desc">Structure des jeux (états, info)</span></div>
+            <div class="file-tree-item level-1">├─ 📄 Menu.h <span class="file-desc">Menu de sélection</span></div>
+            <div class="file-tree-item level-1">│</div>
+            <div class="file-tree-item level-1">├─ 📄 Display.h <span class="file-desc">Rendu OLED (U8g2)</span></div>
+            <div class="file-tree-item level-1">├─ 📄 Input.h <span class="file-desc">Lecture joystick/bouton</span></div>
+            <div class="file-tree-item level-1">├─ 📄 Melodies.h <span class="file-desc">Effets sonores</span></div>
+            <div class="file-tree-item level-1">│</div>
+            <div class="file-tree-item level-1">├─ 📄 Physics.h <span class="file-desc">Collision & mouvement</span></div>
+            <div class="file-tree-item level-1">├─ 📄 Objects.h <span class="file-desc">Pools d'objets</span></div>
+            <div class="file-tree-item level-1">├─ 📄 Procedural.h <span class="file-desc">Génération procédurale</span></div>
+            <div class="file-tree-item level-1">├─ 📄 ProgMem.h <span class="file-desc">Stockage Flash</span></div>
+            <div class="file-tree-item level-1">├─ 📄 Personnages.h <span class="file-desc">Système de personnages</span></div>
+            <div class="file-tree-item level-1">│</div>
+            <div class="file-tree-item level-1">├─ 📄 MonsterHunter.h <span class="file-desc">Jeu 1: Action/Tir</span></div>
+            <div class="file-tree-item level-1">├─ 📄 Aventurier.h <span class="file-desc">Jeu 2: Plateforme</span></div>
+            <div class="file-tree-item level-1">└─ 📄 Breakout.h <span class="file-desc">Jeu 3: Casse-briques</span></div>
+          </div>
+        </div>
+
+        <div class="architecture-card">
+          <h3>🎯 Design Patterns Utilisés</h3>
+          
+          <div class="pattern-list">
+            <div class="pattern-item">
+              <h4>🏭 Object Pool</h4>
+              <p>Gestion d'ennemis et projectiles sans allocation dynamique. Maximum 6 objets par pool.</p>
+            </div>
+
+            <div class="pattern-item">
+              <h4>🎮 Game State Machine</h4>
+              <p>États du jeu: EN_COURS, PAUSE, TERMINE, QUITTER. Transitions claires entre états.</p>
+            </div>
+
+            <div class="pattern-item">
+              <h4>📦 Module Pattern</h4>
+              <p>Chaque fichier .h est un module autonome avec son propre namespace (préfixes mh_, av_, etc.).</p>
+            </div>
+
+            <div class="pattern-item">
+              <h4>🎲 Procedural Generation</h4>
+              <p>Même seed = même résultat. Niveaux infinis sans stocker de données.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Memory Optimization (Optimisation mémoire) -->
+    <section class="memory-section">
+      <div class="container">
+        <h2 class="section-title">💾 Optimisation Mémoire</h2>
+        
+        <div class="memory-grid">
+          <div class="memory-card">
+            <h3>⚠️ Le Défi</h3>
+            <p>L'Arduino Uno a des ressources très limitées:</p>
+            <ul>
+              <li><strong>32 KB Flash</strong> - pour le code</li>
+              <li><strong>2 KB RAM</strong> - pour les variables</li>
+              <li>Buffer OLED = ~128 bytes</li>
+              <li>Stack = ~200-400 bytes</li>
+              <li><strong>RAM disponible: ~1200 bytes!</strong></li>
+            </ul>
+          </div>
+
+          <div class="memory-card">
+            <h3>✅ Solutions Appliquées</h3>
+            <ul class="memory-solutions">
+              <li>
+                <strong>PROGMEM</strong> - Stocker niveaux/textes en Flash
+                <pre><code>NIVEAU_PROGMEM(niv1, {0,56,40});</code></pre>
+              </li>
+              <li>
+                <strong>int8_t</strong> - 1 byte au lieu de 2
+                <pre><code>int8_t x, y;  // au lieu de int</code></pre>
+              </li>
+              <li>
+                <strong>Pools limités</strong> - Max 3-6 objets
+                <pre><code>ObjetMobile balles[4];  // pas 100!</code></pre>
+              </li>
+              <li>
+                <strong>Page Buffer</strong> - OLED en 8 strips
+                <pre><code>// 128 bytes au lieu de 1024</code></pre>
+              </li>
+              <li>
+                <strong>Inline Functions</strong> - Physics.h sans RAM
+                <pre><code>inline bool phys_touchePoint(...)</code></pre>
+              </li>
+            </ul>
+          </div>
+
+          <div class="memory-card">
+            <h3>📊 Résultats</h3>
+            <div class="memory-stats">
+              <div class="memory-stat">
+                <span class="stat-label">Flash utilisée</span>
+                <span class="stat-value">~28 KB / 32 KB</span>
+                <div class="progress-bar">
+                  <div class="progress-fill" style="width: 87.5%"></div>
+                </div>
+              </div>
+              <div class="memory-stat">
+                <span class="stat-label">RAM utilisée</span>
+                <span class="stat-value">~1100 bytes / 2048 bytes</span>
+                <div class="progress-bar">
+                  <div class="progress-fill" style="width: 53.7%"></div>
+                </div>
+              </div>
+            </div>
+            <p class="memory-note">✨ 3 jeux complets dans 2KB de RAM!</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Learning Path (Parcours d'apprentissage) -->
+    <section class="learning-section">
+      <div class="container">
+        <h2 class="section-title">📚 Ce que tu Apprends</h2>
+        
+        <div class="learning-grid">
+          <div class="learning-card">
+            <div class="learning-icon">⚡</div>
+            <h3>Électronique</h3>
+            <ul>
+              <li>Circuits électriques basiques</li>
+              <li>Lecture de capteurs analogiques</li>
+              <li>Communication I2C</li>
+              <li>Signaux PWM</li>
+              <li>Pull-up resistors</li>
+            </ul>
+          </div>
+
+          <div class="learning-card">
+            <div class="learning-icon">💻</div>
+            <h3>Programmation</h3>
+            <ul>
+              <li>Structures et boucles</li>
+              <li>Fonctions et modules</li>
+              <li>Gestion de la mémoire</li>
+              <li>Machines à états</li>
+              <li>Optimisation de code</li>
+            </ul>
+          </div>
+
+          <div class="learning-card">
+            <div class="learning-icon">🎮</div>
+            <h3>Game Design</h3>
+            <ul>
+              <li>Boucle de jeu (game loop)</li>
+              <li>Physique simple</li>
+              <li>Détection de collision</li>
+              <li>IA basique (poursuite)</li>
+              <li>Progression et difficulté</li>
+            </ul>
+          </div>
+
+          <div class="learning-card">
+            <div class="learning-icon">🧮</div>
+            <h3>Mathématiques</h3>
+            <ul>
+              <li>Coordonnées X, Y</li>
+              <li>Vitesse et accélération</li>
+              <li>Distance euclidienne</li>
+              <li>Nombres aléatoires (seed)</li>
+              <li>Modulo et division</li>
+            </ul>
+          </div>
+
+          <div class="learning-card">
+            <div class="learning-icon">🔍</div>
+            <h3>Debugging</h3>
+            <ul>
+              <li>Lecture de messages d'erreur</li>
+              <li>Tests incrémentaux</li>
+              <li>Gestion des crashs</li>
+              <li>Mesure de mémoire</li>
+              <li>Optimisation progressive</li>
+            </ul>
+          </div>
+
+          <div class="learning-card">
+            <div class="learning-icon">📖</div>
+            <h3>Documentation</h3>
+            <ul>
+              <li>Commentaires bilingues</li>
+              <li>Nommage de variables</li>
+              <li>Structure de projet</li>
+              <li>Instructions markdown</li>
+              <li>Commits conventionnels</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tools & Libraries (Outils et bibliothèques) -->
+    <section class="tools-section">
+      <div class="container">
+        <h2 class="section-title">🛠️ Outils & Bibliothèques</h2>
+        
+        <div class="tools-grid">
+          <div class="tool-card">
+            <h3>Arduino IDE</h3>
+            <p>Environnement de développement pour programmer l'Arduino</p>
+            <span class="tool-tag">Gratuit</span>
+          </div>
+
+          <div class="tool-card">
+            <h3>U8g2</h3>
+            <p>Bibliothèque pour écrans OLED avec mode page buffer</p>
+            <span class="tool-tag">Open Source</span>
+          </div>
+
+          <div class="tool-card">
+            <h3>VS Code</h3>
+            <p>Éditeur de code avec support Arduino et Copilot</p>
+            <span class="tool-tag">Recommandé</span>
+          </div>
+
+          <div class="tool-card">
+            <h3>Git</h3>
+            <p>Gestion de versions pour sauvegarder le code</p>
+            <span class="tool-tag">Essentiel</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Future Plans (Plans futurs) -->
+    <section class="future-section">
+      <div class="container">
+        <h2 class="section-title">🚀 Améliorations Futures</h2>
+        
+        <div class="future-grid">
+          <div class="future-card">
+            <span class="future-status">💡 Idée</span>
+            <h3>Écran Couleur</h3>
+            <p>Passer à un écran TFT couleur pour des graphiques encore plus beaux</p>
+          </div>
+
+          <div class="future-card">
+            <span class="future-status">💡 Idée</span>
+            <h3>Sauvegarde EEPROM</h3>
+            <p>Sauvegarder les scores et progrès même après redémarrage</p>
+          </div>
+
+          <div class="future-card">
+            <span class="future-status">💡 Idée</span>
+            <h3>Plus de Jeux</h3>
+            <p>Space Invaders, Snake, Tetris, Pong...</p>
+          </div>
+
+          <div class="future-card">
+            <span class="future-status">💡 Idée</span>
+            <h3>Boîtier 3D</h3>
+            <p>Imprimer un boîtier pour rendre la console portable</p>
+          </div>
+
+          <div class="future-card">
+            <span class="future-status">💡 Idée</span>
+            <h3>Multijoueur</h3>
+            <p>Ajouter un deuxième joystick pour jouer à deux</p>
+          </div>
+
+          <div class="future-card">
+            <span class="future-status">💡 Idée</span>
+            <h3>Effets Visuels</h3>
+            <p>Particules, explosions, animations plus fluides</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Credits (Crédits) -->
+    <section class="credits-section">
+      <div class="container">
+        <div class="credits-card">
+          <h2>👏 Crédits</h2>
+          <div class="credits-content">
+            <div class="credit-item">
+              <strong>Créateur</strong>
+              <p>Sohan (10 ans) - Développeur et Gamer!</p>
+            </div>
+            <div class="credit-item">
+              <strong>Mentors</strong>
+              <p>Parents et enseignants qui ont soutenu le projet</p>
+            </div>
+            <div class="credit-item">
+              <strong>Communauté</strong>
+              <p>Arduino, U8g2, et tous les makers du monde!</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer (Pied de page) -->
+  <footer>
+    <div class="container">
+      <p>🎮 Arcade Sohan - Projet Arduino par Sohan</p>
+      <p class="footer-links">
+        <a href="index.html">Accueil</a> · 
+        <a href="games.html">Les Jeux</a> · 
+        <a href="sohan.html">Sohan</a> · 
+        <a href="https://github.com" target="_blank">Code Source</a>
+      </p>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>👾 Monster Hunter - Arcade Sohan</title>
+  <meta name="description" content="Découvre le jeu Monster Hunter et comment il fonctionne!">
+  <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Navigation (Navigation) -->
+  <header>
+    <nav class="navbar">
+      <div class="container">
+        <div class="logo glow-text">🎮 ARCADE SOHAN</div>
+        <ul class="nav-links">
+          <li><a href="index.html">Accueil</a></li>
+          <li><a href="games.html" class="active">Les Jeux</a></li>
+          <li><a href="about.html">À Propos</a></li>
+          <li><a href="sohan.html">Sohan</a></li>
+        </ul>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Breadcrumb (Fil d'Ariane) -->
+    <section class="breadcrumb">
+      <div class="container">
+        <a href="games.html">← Retour aux jeux</a>
+      </div>
+    </section>
+
+    <!-- Monster Hunter Detail -->
+    <section class="game-detail">
+      <div class="container">
+        <div class="game-detail-card">
+          <div class="game-detail-header">
+            <span class="game-icon-large">👾</span>
+            <div>
+              <h1>Monster Hunter</h1>
+              <div class="game-tags">
+                <span class="tag tag-action">Action</span>
+                <span class="tag tag-topdown">Vue du dessus</span>
+                <span class="tag tag-shooting">Tir</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="game-detail-content">
+            <div class="game-description-section">
+              <h3>📝 Description</h3>
+              <p>
+                <strong>Monster Hunter</strong> est un jeu d'action en vue du dessus où tu dois 
+                chasser des monstres, manger de la nourriture pour recharger tes munitions, 
+                et affronter des boss épiques! Plus tu avances, plus les monstres deviennent 
+                rapides et dangereux.
+              </p>
+            </div>
+
+            <div class="game-controls-section">
+              <h3>🎮 Contrôles</h3>
+              <ul class="controls-list">
+                <li><strong>Joystick ↑↓←→</strong> : Déplacer le personnage</li>
+                <li><strong>Bouton</strong> : Tirer (coûte 1 munition)</li>
+                <li><strong>Objectif</strong> : Mange la nourriture pour recharger tes munitions</li>
+              </ul>
+            </div>
+
+            <div class="game-features-section">
+              <h3>✨ Fonctionnalités</h3>
+              <ul class="features-list">
+                <li>🎯 <strong>Système de munitions</strong> : Gère tes tirs intelligemment</li>
+                <li>👹 <strong>Boss tous les 5 niveaux</strong> : Défis épiques avec plus de points de vie</li>
+                <li>⭐ <strong>Système d'étoiles</strong> : Gagne des étoiles pour débloquer des personnages</li>
+                <li>🎲 <strong>Génération procédurale</strong> : Chaque partie est différente</li>
+                <li>🔊 <strong>Effets sonores</strong> : Sons de tir, de coup, et d'alerte boss</li>
+              </ul>
+            </div>
+
+            <div class="game-code-section">
+              <h3>💻 Comment ça marche?</h3>
+              
+              <div class="code-explanation">
+                <h4>🗂️ Structure du Code</h4>
+                <p>Le jeu utilise plusieurs modules pour organiser le code:</p>
+                <ul>
+                  <li><code>MonsterHunter.h</code> - Logique principale du jeu</li>
+                  <li><code>Objects.h</code> - Gestion des objets (monstres, nourriture)</li>
+                  <li><code>Procedural.h</code> - Génération aléatoire des positions</li>
+                  <li><code>Physics.h</code> - Détection de collision</li>
+                  <li><code>Personnages.h</code> - Système de personnages</li>
+                </ul>
+              </div>
+
+              <div class="code-explanation">
+                <h4>🎯 Système de Collision</h4>
+                <p>Le jeu utilise la fonction <code>phys_touchePoint()</code> pour détecter:</p>
+                <ul>
+                  <li>Quand le joueur touche un monstre (Game Over)</li>
+                  <li>Quand une balle touche un monstre (Tué!)</li>
+                  <li>Quand le joueur mange la nourriture (Recharge)</li>
+                </ul>
+                <pre><code>// Exemple de code (Example code)
+if (phys_touchePoint(joueurX, joueurY, 
+                     monstreX, monstreY, seuil)) {
+  // Collision détectée!
+}</code></pre>
+              </div>
+
+              <div class="code-explanation">
+                <h4>🎲 Boss System</h4>
+                <p>Chaque 5 niveaux, un boss apparaît avec plus de vie:</p>
+                <pre><code>// Boss tous les 5 niveaux (Boss every 5 levels)
+if (niveau % 5 == 0) {
+  estBoss = true;
+  vieBoss = 3 + (niveau / 5);
+  melodieAlerteBoss();
+}</code></pre>
+              </div>
+
+              <div class="code-explanation">
+                <h4>💾 Optimisation Mémoire</h4>
+                <p>Pour tenir dans les 2KB de RAM de l'Arduino:</p>
+                <ul>
+                  <li>Maximum 3 monstres en même temps</li>
+                  <li>Maximum 4 balles en même temps</li>
+                  <li>Utilisation de <code>int8_t</code> (1 byte) au lieu de <code>int</code> (2 bytes)</li>
+                  <li>Objets réutilisés avec un système de pool</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigation vers autres jeux -->
+        <div class="game-navigation">
+          <a href="aventurier.html" class="nav-game-card">
+            <span class="nav-icon">🏃</span>
+            <span class="nav-text">Suivant: Aventurier →</span>
+          </a>
+          <a href="common-systems.html" class="nav-game-card">
+            <span class="nav-icon">🔧</span>
+            <span class="nav-text">Systèmes Communs</span>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer (Pied de page) -->
+  <footer>
+    <div class="container">
+      <p>🎮 Arcade Sohan - Projet Arduino par Sohan</p>
+      <p class="footer-links">
+        <a href="index.html">Accueil</a> · 
+        <a href="games.html">Les Jeux</a> · 
+        <a href="about.html">À Propos</a> · 
+        <a href="sohan.html">Sohan</a>
+      </p>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

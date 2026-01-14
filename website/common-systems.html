@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🔧 Systèmes Communs - Arcade Sohan</title>
+  <meta name="description" content="Découvre les modules partagés par tous les jeux!">
+  <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Navigation (Navigation) -->
+  <header>
+    <nav class="navbar">
+      <div class="container">
+        <div class="logo glow-text">🎮 ARCADE SOHAN</div>
+        <ul class="nav-links">
+          <li><a href="index.html">Accueil</a></li>
+          <li><a href="games.html" class="active">Les Jeux</a></li>
+          <li><a href="about.html">À Propos</a></li>
+          <li><a href="sohan.html">Sohan</a></li>
+        </ul>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Breadcrumb (Fil d'Ariane) -->
+    <section class="breadcrumb">
+      <div class="container">
+        <a href="games.html">← Retour aux jeux</a>
+      </div>
+    </section>
+
+    <!-- Page Header (En-tête de page) -->
+    <section class="page-header">
+      <div class="container">
+        <h1 class="glow-text">🔧 Systèmes Communs</h1>
+        <p>Les modules partagés par tous les jeux de la console</p>
+      </div>
+    </section>
+
+    <!-- Common Systems (Systèmes communs) -->
+    <section class="common-systems">
+      <div class="container">
+        <h2 class="section-title">📦 Modules Réutilisables</h2>
+        
+        <p class="intro-text">
+          Pour éviter de dupliquer du code et économiser de la mémoire, tous les jeux 
+          partagent des modules communs. Chaque module est un fichier <code>.h</code> 
+          qui peut être inclus dans n'importe quel jeu.
+        </p>
+
+        <div class="systems-grid">
+          <div class="system-card">
+            <h3>📺 Display.h - Affichage</h3>
+            <p>
+              Module pour dessiner sur l'écran OLED. Utilise le mode "page buffer" 
+              pour économiser la RAM (128 bytes au lieu de 1024).
+            </p>
+            <h4>Fonctions principales :</h4>
+            <ul>
+              <li><code>DESSINER_ECRAN { }</code> - Macro obligatoire pour dessiner</li>
+              <li><code>ecrireTexte(x, y, "text", size)</code> - Afficher du texte</li>
+              <li><code>dessinerRectangle(x, y, w, h)</code> - Dessiner des formes</li>
+              <li><code>dessinerCercle(x, y, r)</code> - Dessiner un cercle</li>
+            </ul>
+            <div class="code-example">
+              <pre><code>DESSINER_ECRAN {
+  ecrireTexte(0, 0, "Score:", 1);
+  ecrireNombre(40, 0, score, 1);
+}</code></pre>
+            </div>
+          </div>
+
+          <div class="system-card">
+            <h3>🕹️ Input.h - Contrôles</h3>
+            <p>
+              Module pour lire le joystick et le bouton. Gère la détection des 
+              directions et les pressions de bouton avec debouncing.
+            </p>
+            <h4>Fonctions principales :</h4>
+            <ul>
+              <li><code>lireJoystick()</code> - Mettre à jour l'état (appeler chaque frame)</li>
+              <li><code>joystickHaut()</code> - Vérifier direction haut</li>
+              <li><code>joystickBas()</code> - Vérifier direction bas</li>
+              <li><code>joystickGauche()</code> - Vérifier direction gauche</li>
+              <li><code>joystickDroite()</code> - Vérifier direction droite</li>
+              <li><code>boutonJustePresse()</code> - Détection de clic (edge detection)</li>
+            </ul>
+            <div class="code-example">
+              <pre><code>lireJoystick();
+if (joystickGauche()) joueurX -= 2;
+if (boutonJustePresse()) tirer();</code></pre>
+            </div>
+          </div>
+
+          <div class="system-card">
+            <h3>🎵 Melodies.h - Sons</h3>
+            <p>
+              Mélodies pré-faites pour différentes actions du jeu. Utilise le buzzer 
+              passif pour créer des sons rétro.
+            </p>
+            <h4>Mélodies disponibles :</h4>
+            <ul>
+              <li><code>melodieStartup()</code> - Démarrage de la console</li>
+              <li><code>melodieTir()</code> - Son de tir</li>
+              <li><code>melodieGameOver()</code> - Fin de partie</li>
+              <li><code>melodieAlerteBoss()</code> - Boss apparaît</li>
+              <li><code>melodieVictoireBoss()</code> - Boss vaincu</li>
+              <li><code>melodieNiveauSup()</code> - Level up</li>
+            </ul>
+            <div class="code-example">
+              <pre><code>if (toucheEnnemi) {
+  melodieMonstreTouche();
+  score += 25;
+}</code></pre>
+            </div>
+          </div>
+
+          <div class="system-card">
+            <h3>🔬 Physics.h - Physique</h3>
+            <p>
+              Fonctions pour la détection de collision et le mouvement. Zéro coût 
+              en RAM car toutes les fonctions sont <code>inline</code>.
+            </p>
+            <h4>Fonctions principales :</h4>
+            <ul>
+              <li><code>phys_touchePoint(x1, y1, x2, y2, dist)</code> - Collision cercle</li>
+              <li><code>phys_toucheBoite(x, y, w, h, ...)</code> - Collision rectangle</li>
+              <li><code>phys_bougerVers(&x, &y, tx, ty, speed)</code> - IA de poursuite</li>
+              <li><code>phys_clampEcran(&x, &y, margin, topMargin)</code> - Rester à l'écran</li>
+            </ul>
+            <div class="code-example">
+              <pre><code>// Collision joueur-monstre
+if (phys_touchePoint(joueurX, joueurY, 
+                     monstreX, monstreY, 10)) {
+  gameOver();
+}</code></pre>
+            </div>
+          </div>
+
+          <div class="system-card">
+            <h3>📦 Objects.h - Objets</h3>
+            <p>
+              Système de pool pour gérer plusieurs objets (ennemis, projectiles) 
+              sans allocation dynamique de mémoire.
+            </p>
+            <h4>Structures et fonctions :</h4>
+            <ul>
+              <li><code>ObjetSimple</code> - Objets statiques (collectibles, checkpoints)</li>
+              <li><code>ObjetMobile</code> - Objets avec vélocité (balles, ennemis mobiles)</li>
+              <li><code>obj_creer(pool, size, x, y, type)</code> - Créer un objet</li>
+              <li><code>obj_touchePoint(pool, size, x, y, dist)</code> - Collision</li>
+              <li>Maximum 6 objets par pool</li>
+            </ul>
+            <div class="code-example">
+              <pre><code>ObjetMobile balles[4];
+objm_initialiser(balles, 4);
+objm_creer(balles, 4, x, y, vx, vy, 1);</code></pre>
+            </div>
+          </div>
+
+          <div class="system-card">
+            <h3>🎲 Procedural.h - Génération</h3>
+            <p>
+              Génération procédurale de niveaux et positions. Même seed = même résultat 
+              pour des niveaux rejouables et testables.
+            </p>
+            <h4>Fonctions principales :</h4>
+            <ul>
+              <li><code>proc_genererPosition(seed, idx, &x, &y, margin)</code> - Position aléatoire</li>
+              <li><code>proc_genererPlateformes(level, plat, n, diff)</code> - Créer des plateformes</li>
+              <li><code>proc_calculerDifficulte(level)</code> - Retourne difficulté 1-3</li>
+              <li><code>proc_genererLoinDe(seed, idx, &x, &y, ...)</code> - Loin d'un point</li>
+            </ul>
+            <div class="code-example">
+              <pre><code>// Niveau 1 = toujours les mêmes plateformes
+proc_genererPlateformes(niveau, plat, 5, 1);</code></pre>
+            </div>
+          </div>
+
+          <div class="system-card">
+            <h3>💾 ProgMem.h - Mémoire</h3>
+            <p>
+              Stockage de données dans la Flash (32KB) au lieu de la RAM (2KB). 
+              Essentiel pour tenir dans l'Arduino Uno.
+            </p>
+            <h4>Macros et fonctions :</h4>
+            <ul>
+              <li><code>NIVEAU_PROGMEM(name, {...})</code> - Stocker un niveau</li>
+              <li><code>TEXTE_PROGMEM(name, "text")</code> - Stocker du texte</li>
+              <li><code>pm_charger3Colonnes(src, dest, n)</code> - Charger en RAM</li>
+              <li><code>pm_lireTexte(txt)</code> - Lire du texte</li>
+              <li>Économise des centaines de bytes de RAM</li>
+            </ul>
+            <div class="code-example">
+              <pre><code>NIVEAU_PROGMEM(niv1, {0,56,40, 45,46,30});
+pm_charger3Colonnes(niv1, plat, 2);</code></pre>
+            </div>
+          </div>
+
+          <div class="system-card">
+            <h3>👤 Personnages.h - Avatars</h3>
+            <p>
+              Système de personnages débloquables. Les joueurs gagnent des étoiles 
+              pour débloquer de nouveaux avatars avec différents designs.
+            </p>
+            <h4>Personnages et fonctions :</h4>
+            <ul>
+              <li>4 personnages: Blob (gratuit), Bonhomme, Héros, Champion</li>
+              <li>Système d'étoiles: 0, 99, 300, 600</li>
+              <li><code>pers_dessinerPlateforme(x, y, perso, dir, frame)</code> - Vue côté</li>
+              <li><code>pers_dessinerVueHaut(x, y, taille, perso, dir)</code> - Vue dessus</li>
+              <li><code>ajouterEtoiles(nombre)</code> - Gagner des étoiles</li>
+            </ul>
+            <div class="code-example">
+              <pre><code>pers_dessinerVueHaut(joueurX, joueurY, 8,
+                     personnageActuel, direction);</code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Benefits Section (Avantages) -->
+    <section class="benefits-section">
+      <div class="container">
+        <h2 class="section-title">✨ Avantages des Modules</h2>
+        
+        <div class="benefits-grid">
+          <div class="benefit-card">
+            <div class="benefit-icon">♻️</div>
+            <h3>Réutilisabilité</h3>
+            <p>Écrire le code une fois, l'utiliser partout. Économise du temps de développement.</p>
+          </div>
+
+          <div class="benefit-card">
+            <div class="benefit-icon">💾</div>
+            <h3>Économie de Mémoire</h3>
+            <p>Partager le code entre jeux évite la duplication. Un seul <code>Physics.h</code> pour tous!</p>
+          </div>
+
+          <div class="benefit-card">
+            <div class="benefit-icon">🐛</div>
+            <h3>Maintenance Facile</h3>
+            <p>Corriger un bug dans un module = corriger pour tous les jeux en même temps.</p>
+          </div>
+
+          <div class="benefit-card">
+            <div class="benefit-icon">📚</div>
+            <h3>Code Organisé</h3>
+            <p>Structure claire : chaque module a une responsabilité unique et bien définie.</p>
+          </div>
+
+          <div class="benefit-card">
+            <div class="benefit-icon">⚡</div>
+            <h3>Développement Rapide</h3>
+            <p>Créer un nouveau jeu est plus rapide avec tous les outils déjà disponibles.</p>
+          </div>
+
+          <div class="benefit-card">
+            <div class="benefit-icon">🎓</div>
+            <h3>Facile à Apprendre</h3>
+            <p>Chaque module peut être étudié indépendamment. Apprentissage progressif.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+      <div class="container">
+        <div class="cta-box">
+          <h2>🔧 Envie de construire ta propre console?</h2>
+          <p>Découvre comment assembler le hardware et comprendre le code Arduino!</p>
+          <a href="about.html" class="btn-arcade btn-large">Voir le guide →</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer (Pied de page) -->
+  <footer>
+    <div class="container">
+      <p>🎮 Arcade Sohan - Projet Arduino par Sohan</p>
+      <p class="footer-links">
+        <a href="index.html">Accueil</a> · 
+        <a href="games.html">Les Jeux</a> · 
+        <a href="about.html">À Propos</a> · 
+        <a href="sohan.html">Sohan</a>
+      </p>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

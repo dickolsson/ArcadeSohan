@@ -17,7 +17,8 @@
 
 // Inclure les jeux (Include games)
 #include "MonsterHunter.h"  // Jeu Monster Hunter
-#include "Aventurier.h"     // TEST: include mais pas dans menu
+#include "Aventurier.h"     // Jeu Aventurier
+#include "Breakout.h"       // Jeu Breakout (Casse-briques)
 
 // ==========================================================
 // ÉTATS DU SYSTÈME (System states)
@@ -51,7 +52,8 @@ void setup() {
   // Pour ajouter un nouveau jeu, ajoute une ligne ici!
   // (To add a new game, add a line here!)
   menu_ajouterJeu(infoMonsterHunter.nom);
-  menu_ajouterJeu(infoAventurier.nom);  // TEST ACTIVE
+  menu_ajouterJeu(infoAventurier.nom);
+  menu_ajouterJeu(infoBreakout.nom);
   
   // Afficher l'écran de démarrage (Show startup screen)
   menu_afficherDemarrage();
@@ -111,6 +113,12 @@ void lancerJeu(int numeroJeu) {
     av_resetJeu();
     av_setupJeu();
   }
+  
+  if (numeroJeu == 2) {
+    // Breakout!
+    br_resetJeu();
+    br_setupJeu();
+  }
 }
 
 // Exécuter la boucle d'un jeu (Run a game's loop)
@@ -123,5 +131,10 @@ void executerJeu(int numeroJeu) {
   if (numeroJeu == 1) {
     // Aventurier!
     av_loopJeu();
+  }
+  
+  if (numeroJeu == 2) {
+    // Breakout!
+    br_loopJeu();
   }
 }

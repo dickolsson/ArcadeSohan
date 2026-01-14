@@ -203,8 +203,8 @@ void proc_genererDansCoin(int seed, int index, int* x, int* y, int marge) {
 // ==========================================================
 
 // Configuration de saut (Jump configuration)
-#define PROC_SAUT_MAX_X 35      // Distance max saut horizontal
-#define PROC_SAUT_MAX_Y 20      // Distance max saut vertical
+#define PROC_SAUT_MAX_X 30      // Distance max saut horizontal (réduit de 35 à 30)
+#define PROC_SAUT_MAX_Y 12      // Distance max saut vertical (réduit de 20 à 12)
 
 // ----------------------------------------------------------
 // proc_sautPossible - Vérifie si un saut est faisable
@@ -212,21 +212,24 @@ void proc_genererDansCoin(int seed, int index, int* x, int* y, int marge) {
 // ----------------------------------------------------------
 
 bool proc_sautPossible(int deltaX, int deltaY, int difficulte) {
-  int pourcentage = 70 + (difficulte * 10);
+  // Distances réalistes basées sur tests
+  // (Realistic distances based on testing)
   
-  int maxX;
+  // Plus on monte, moins on peut aller loin horizontalement
+  // (The higher we jump, the less horizontal distance we can cover)
   if (deltaY <= 0) {
-    maxX = PROC_SAUT_MAX_X + 5;
-  } else if (deltaY <= 8) {
-    maxX = PROC_SAUT_MAX_X;
-  } else if (deltaY <= 14) {
-    maxX = PROC_SAUT_MAX_X - 8;
+    // Sauter vers le bas: facile!
+    return (deltaX <= 35);
+  } else if (deltaY <= 6) {
+    // Petit saut vers le haut
+    return (deltaX <= 25);
+  } else if (deltaY <= 10) {
+    // Saut moyen
+    return (deltaX <= 20);
   } else {
-    maxX = PROC_SAUT_MAX_X - 15;
+    // Grand saut: très court en horizontal
+    return (deltaX <= 12);
   }
-  
-  maxX = (maxX * pourcentage) / 100;
-  return (deltaX <= maxX);
 }
 
 // ----------------------------------------------------------
@@ -247,10 +250,16 @@ bool proc_sautPossible(int deltaX, int deltaY, int difficulte) {
 int proc_genererPlateformes(int niveau, int plat[][3], int nbPlat, int difficulte) {
   proc_init(niveau * 12345);
   
-  int largeurMin = 35 - (difficulte * 8);
-  int largeurMax = 45 - (difficulte * 8);
-  if (largeurMin < 15) largeurMin = 15;
-  if (largeurMax < 20) largeurMax = 20;
+  // Plateformes plus larges pour niveaux faciles
+  int largeurMin = 30;
+  int largeurMax = 40;
+  if (difficulte == 2) {
+    largeurMin = 25;
+    largeurMax = 35;
+  } else if (difficulte >= 3) {
+    largeurMin = 20;
+    largeurMax = 30;
+  }
   
   // Première plateforme: spawn en bas à gauche
   plat[0][0] = 0;
@@ -265,52 +274,66 @@ int proc_genererPlateformes(int niveau, int plat[][3], int nbPlat, int difficult
     int nouveauX, nouveauY, largeur;
     int deltaX, deltaY;
     int essais = 0;
+    bool sautValide = false;
     
     do {
-      deltaX = proc_random(15, PROC_SAUT_MAX_X);
-      deltaY = proc_random(6, PROC_SAUT_MAX_Y);
+      // Distances plus conservatrices
+      deltaX = proc_random(10, 25);
+      deltaY = proc_random(4, PROC_SAUT_MAX_Y);
       
+      // Favorise mouvement vers la droite (60%)
       int direction = proc_random(0, 100);
-      if (direction < 40) {
+      if (direction < 30 && dernierX > 30) {
+        // Gauche: seulement si on n'est pas trop à gauche
         nouveauX = dernierX - deltaX;
       } else {
+        // Droite
         nouveauX = dernierX + deltaX;
       }
       
       nouveauY = dernierY - deltaY;
       largeur = proc_random(largeurMin, largeurMax);
       
+      // Contraintes d'écran avec marges
       if (nouveauX < 5) nouveauX = 5;
       if (nouveauX > PROC_ECRAN_LARGEUR - largeur - 5) {
         nouveauX = PROC_ECRAN_LARGEUR - largeur - 5;
       }
-      if (nouveauY < 10) nouveauY = 10;
+      if (nouveauY < 12) nouveauY = 12;  // Marge pour barre de score
       if (nouveauY > 50) nouveauY = 50;
       
+      // Calculer distance centre-à-centre
+      int centreAncien = dernierX;
       int centreNouveau = nouveauX + largeur / 2;
-      deltaX = dernierX - centreNouveau;
+      deltaX = centreNouveau - centreAncien;
       if (deltaX < 0) deltaX = -deltaX;
       
+      // Soustraire les bords des plateformes
       int bordDerniere = dernierLargeur / 2;
       int bordNouvelle = largeur / 2;
       deltaX = deltaX - bordDerniere - bordNouvelle;
       if (deltaX < 0) deltaX = 0;
       
       deltaY = dernierY - nouveauY;
+      
+      // Vérifier si saut possible
+      sautValide = proc_sautPossible(deltaX, deltaY, difficulte);
+      
       essais++;
       
-      if (essais > 10) {
-        nouveauX = dernierX + proc_random(-20, 20);
+      // Fallback après plusieurs essais: position proche et facile
+      if (essais > 15) {
+        nouveauX = dernierX + proc_random(-15, 20);
         if (nouveauX < 5) nouveauX = 5;
         if (nouveauX > PROC_ECRAN_LARGEUR - largeur - 5) {
           nouveauX = PROC_ECRAN_LARGEUR - largeur - 5;
         }
-        nouveauY = dernierY - proc_random(5, 10);
-        if (nouveauY < 10) nouveauY = 10;
-        break;
+        nouveauY = dernierY - proc_random(4, 8);
+        if (nouveauY < 12) nouveauY = 12;
+        sautValide = true;  // Force acceptation
       }
       
-    } while (!proc_sautPossible(deltaX, deltaY, difficulte));
+    } while (!sautValide && essais < 20);
     
     plat[i][0] = nouveauX;
     plat[i][1] = nouveauY;

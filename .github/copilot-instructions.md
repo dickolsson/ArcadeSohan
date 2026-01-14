@@ -198,10 +198,38 @@ Use **Conventional Commits**:
 
 ---
 
+## 🌐 Website Development
+
+**Location:** `website/` directory
+
+### Serving the Website Locally
+
+To view the documentation website:
+
+```bash
+make serve-website
+```
+
+This starts a local web server at **http://localhost:8080**
+
+Open your browser to:
+- http://localhost:8080/index.html
+- http://localhost:8080/games.html
+- http://localhost:8080/about.html
+
+**Manual command:**
+```bash
+cd website && python3 -m http.server 8080
+```
+
+**Guidelines:** Follow [website.instructions.md](.github/instructions/website.instructions.md) for styling and structure rules.
+
+---
+
 ## 🔌 Hardware Configuration
 
 | Component | Pin | Purpose |
-|-----------|-----|---------|
+|-----------|--------|
 | OLED SDA | A4 | I2C Data |
 | OLED SCL | A5 | I2C Clock |
 | Joystick X | A0 | Horizontal |

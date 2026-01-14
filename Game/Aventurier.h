@@ -104,7 +104,7 @@ NIVEAU_PROGMEM(av_niv3_plat, {
 });
 const uint8_t av_niv3_porte[] PROGMEM = { 80, 13 };
 
-// Niveau 4+
+// Niveau 4
 NIVEAU_PROGMEM(av_niv4_plat, {
   0, 56, 40,
   28, 48, 18,
@@ -114,6 +114,16 @@ NIVEAU_PROGMEM(av_niv4_plat, {
 });
 const uint8_t av_niv4_porte[] PROGMEM = { 115, 21 };
 
+// Niveau 5 - Avec plateforme intermédiaire (with intermediate platform)
+NIVEAU_PROGMEM(av_niv5_plat, {
+  0, 56, 40,      // Départ (start)
+  35, 46, 22,     // Première montée (first climb)
+  65, 36, 22,     // Plateforme intermédiaire (middle platform)
+  95, 46, 22,     // Retour en bas (back down)
+  70, 24, 35      // Plateforme finale (final platform)
+});
+const uint8_t av_niv5_porte[] PROGMEM = { 85, 9 };
+
 // ==========================================================
 // CRÉER NIVEAU (Create level)
 // ==========================================================
@@ -122,8 +132,8 @@ void av_creerNiveau() {
   // Toujours 5 plateformes (Always 5 platforms)
   av_nbPlat = 5;
   
-  // Niveaux 1-4: chargés depuis PROGMEM (hand-crafted)
-  // Niveaux 5+: générés procéduralement (infinite!)
+  // Niveaux 1-5: chargés depuis PROGMEM (hand-crafted)
+  // Niveaux 6+: générés procéduralement (infinite!)
   
   if (av_niveau == 1) {
     obj_chargerPlateformes(av_niv1_plat, av_plat, 5);
@@ -141,9 +151,13 @@ void av_creerNiveau() {
     obj_chargerPlateformes(av_niv4_plat, av_plat, 5);
     pm_chargerPorte(av_niv4_porte, &av_porteX, &av_porteY);
   }
+  else if (av_niveau == 5) {
+    obj_chargerPlateformes(av_niv5_plat, av_plat, 5);
+    pm_chargerPorte(av_niv5_porte, &av_porteX, &av_porteY);
+  }
   else {
-    // Niveau 5+: génération procédurale avec ObjetSimple!
-    // (Level 5+: procedural generation with ObjetSimple!)
+    // Niveau 6+: génération procédurale avec ObjetSimple!
+    // (Level 6+: procedural generation with ObjetSimple!)
     int difficulte = proc_calculerDifficulte(av_niveau);
     
     // Générer dans tableau temporaire puis copier

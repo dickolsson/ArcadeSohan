@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🏃 Aventurier - Arcade Sohan</title>
+  <meta name="description" content="Découvre le jeu Aventurier et comment il fonctionne!">
+  <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Navigation (Navigation) -->
+  <header>
+    <nav class="navbar">
+      <div class="container">
+        <div class="logo glow-text">🎮 ARCADE SOHAN</div>
+        <ul class="nav-links">
+          <li><a href="index.html">Accueil</a></li>
+          <li><a href="games.html" class="active">Les Jeux</a></li>
+          <li><a href="about.html">À Propos</a></li>
+          <li><a href="sohan.html">Sohan</a></li>
+        </ul>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Breadcrumb (Fil d'Ariane) -->
+    <section class="breadcrumb">
+      <div class="container">
+        <a href="games.html">← Retour aux jeux</a>
+      </div>
+    </section>
+
+    <!-- Aventurier Detail -->
+    <section class="game-detail">
+      <div class="container">
+        <div class="game-detail-card">
+          <div class="game-detail-header">
+            <span class="game-icon-large">🏃</span>
+            <div>
+              <h1>Aventurier</h1>
+              <div class="game-tags">
+                <span class="tag tag-platform">Plateforme</span>
+                <span class="tag tag-puzzle">Puzzle</span>
+                <span class="tag tag-physics">Physique</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="game-detail-content">
+            <div class="game-description-section">
+              <h3>📝 Description</h3>
+              <p>
+                <strong>Aventurier</strong> est un jeu de plateforme où tu dois sauter de 
+                plateforme en plateforme pour atteindre la porte magique! Les premiers niveaux 
+                sont faits à la main, puis le jeu génère automatiquement des niveaux infinis 
+                de plus en plus difficiles.
+              </p>
+            </div>
+
+            <div class="game-controls-section">
+              <h3>🎮 Contrôles</h3>
+              <ul class="controls-list">
+                <li><strong>Joystick ←→</strong> : Déplacer gauche/droite</li>
+                <li><strong>Bouton</strong> : Sauter (seulement si au sol)</li>
+                <li><strong>Objectif</strong> : Atteindre la porte dorée ✨</li>
+              </ul>
+            </div>
+
+            <div class="game-features-section">
+              <h3>✨ Fonctionnalités</h3>
+              <ul class="features-list">
+                <li>🎯 <strong>Physique réaliste</strong> : Gravité et vitesse de saut naturelles</li>
+                <li>🗺️ <strong>4 niveaux faits main</strong> : Tutoriel progressif</li>
+                <li>∞ <strong>Niveaux infinis</strong> : Génération procédurale après le niveau 4</li>
+                <li>⚡ <strong>Difficulté croissante</strong> : Sauts de plus en plus difficiles</li>
+                <li>🚪 <strong>Porte animée</strong> : Effet brillant pour la sortie</li>
+              </ul>
+            </div>
+
+            <div class="game-code-section">
+              <h3>💻 Comment ça marche?</h3>
+              
+              <div class="code-explanation">
+                <h4>🎮 Système de Saut</h4>
+                <p>Le jeu utilise une vraie physique de gravité:</p>
+                <pre><code>// Appliquer la gravité (Apply gravity)
+vitesseY += GRAVITE;  // Tombe de plus en plus vite
+
+// Sauter si au sol (Jump if on ground)
+if (boutonJustePresse() && auSol) {
+  vitesseY = -FORCE_SAUT;
+  auSol = false;
+}</code></pre>
+              </div>
+
+              <div class="code-explanation">
+                <h4>🗺️ Niveaux Mixtes</h4>
+                <p>Les 4 premiers niveaux sont stockés en mémoire Flash (PROGMEM), 
+                   puis le jeu passe à la génération procédurale:</p>
+                <pre><code>// Créer un niveau (Create a level)
+void creerNiveau() {
+  if (niveau <= 4) {
+    // Charger niveau fait main (Load handmade)
+    pm_charger3Colonnes(niveaux[niveau], plat, 5);
+    pm_chargerPaire(portes[niveau], &porteX, &porteY);
+  } else {
+    // Générer procédural (Generate procedural)
+    int diff = proc_calculerDifficulte(niveau);
+    proc_genererPlateformes(niveau, plat, 5, diff);
+    proc_genererPorte(plat, 5, &porteX, &porteY);
+  }
+}</code></pre>
+              </div>
+
+              <div class="code-explanation">
+                <h4>🔍 Détection de Collision</h4>
+                <p>Le jeu vérifie si le joueur touche une plateforme:</p>
+                <pre><code>// Vérifier collision plateforme
+auSol = false;
+for (int i = 0; i < 5; i++) {
+  if (phys_toucheBoite(joueurX, joueurY, 6, 8,
+                       plat[i][0], plat[i][1], 
+                       plat[i][2], 4)) {
+    auSol = true;
+    vitesseY = 0;
+    break;
+  }
+}</code></pre>
+              </div>
+
+              <div class="code-explanation">
+                <h4>💾 Économie de Mémoire</h4>
+                <p>Astuces pour économiser de la RAM:</p>
+                <ul>
+                  <li>Seulement 5 plateformes maximum par niveau</li>
+                  <li>Niveaux faits main stockés en Flash, pas en RAM</li>
+                  <li>Une seule fonction <code>creerNiveau()</code> au lieu de 10+ fonctions</li>
+                  <li>Variables <code>int8_t</code> pour les petites valeurs</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigation vers autres jeux -->
+        <div class="game-navigation">
+          <a href="monster-hunter.html" class="nav-game-card">
+            <span class="nav-icon">👾</span>
+            <span class="nav-text">← Précédent: Monster Hunter</span>
+          </a>
+          <a href="breakout.html" class="nav-game-card">
+            <span class="nav-icon">🧱</span>
+            <span class="nav-text">Suivant: Breakout →</span>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer (Pied de page) -->
+  <footer>
+    <div class="container">
+      <p>🎮 Arcade Sohan - Projet Arduino par Sohan</p>
+      <p class="footer-links">
+        <a href="index.html">Accueil</a> · 
+        <a href="games.html">Les Jeux</a> · 
+        <a href="about.html">À Propos</a> · 
+        <a href="sohan.html">Sohan</a>
+      </p>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🧱 Breakout - Arcade Sohan</title>
+  <meta name="description" content="Découvre le jeu Breakout et comment il fonctionne!">
+  <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Navigation (Navigation) -->
+  <header>
+    <nav class="navbar">
+      <div class="container">
+        <div class="logo glow-text">🎮 ARCADE SOHAN</div>
+        <ul class="nav-links">
+          <li><a href="index.html">Accueil</a></li>
+          <li><a href="games.html" class="active">Les Jeux</a></li>
+          <li><a href="about.html">À Propos</a></li>
+          <li><a href="sohan.html">Sohan</a></li>
+        </ul>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Breadcrumb (Fil d'Ariane) -->
+    <section class="breadcrumb">
+      <div class="container">
+        <a href="games.html">← Retour aux jeux</a>
+      </div>
+    </section>
+
+    <!-- Breakout Detail -->
+    <section class="game-detail">
+      <div class="container">
+        <div class="game-detail-card">
+          <div class="game-detail-header">
+            <span class="game-icon-large">🧱</span>
+            <div>
+              <h1>Breakout</h1>
+              <div class="game-tags">
+                <span class="tag tag-arcade">Arcade</span>
+                <span class="tag tag-classic">Classique</span>
+                <span class="tag tag-reflexes">Réflexes</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="game-detail-content">
+            <div class="game-description-section">
+              <h3>📝 Description</h3>
+              <p>
+                <strong>Breakout</strong> est le classique jeu de casse-briques! Déplace ta 
+                raquette pour empêcher la balle de tomber et casse toutes les briques. 
+                Plus tu avances, plus la balle devient rapide et les motifs de briques 
+                deviennent complexes.
+              </p>
+            </div>
+
+            <div class="game-controls-section">
+              <h3>🎮 Contrôles</h3>
+              <ul class="controls-list">
+                <li><strong>Joystick ←→</strong> : Déplacer la raquette</li>
+                <li><strong>Objectif</strong> : Casser toutes les briques</li>
+                <li><strong>Attention</strong> : Ne laisse pas la balle tomber!</li>
+              </ul>
+            </div>
+
+            <div class="game-features-section">
+              <h3>✨ Fonctionnalités</h3>
+              <ul class="features-list">
+                <li>🧱 <strong>Système de briques</strong> : Plusieurs rangées à détruire</li>
+                <li>⚡ <strong>Vitesse progressive</strong> : La balle accélère à chaque niveau</li>
+                <li>🎨 <strong>Motifs variés</strong> : Différentes dispositions de briques</li>
+                <li>💥 <strong>Rebonds réalistes</strong> : Physique de collision précise</li>
+                <li>🔊 <strong>Sons d'arcade</strong> : Bip à chaque rebond</li>
+              </ul>
+            </div>
+
+            <div class="game-code-section">
+              <h3>💻 Comment ça marche?</h3>
+              
+              <div class="code-explanation">
+                <h4>⚽ Physique de la Balle</h4>
+                <p>La balle rebondit sur les murs, la raquette et les briques:</p>
+                <pre><code>// Mouvement de la balle (Ball movement)
+balleX += vitesseBalleX;
+balleY += vitesseBalleY;
+
+// Rebond sur les murs (Wall bounce)
+if (balleX <= 0 || balleX >= 127) {
+  vitesseBalleX = -vitesseBalleX;
+}
+
+// Rebond sur la raquette (Paddle bounce)
+if (phys_toucheBoite(balleX, balleY, 3, 3,
+                     raquetteX, 58, 20, 4)) {
+  vitesseBalleY = -vitesseBalleY;
+  melodieRebond();
+}</code></pre>
+              </div>
+
+              <div class="code-explanation">
+                <h4>🧱 Système de Briques</h4>
+                <p>Chaque brique est stockée dans un tableau:</p>
+                <pre><code>// Structure des briques (Brick structure)
+int briques[MAX_BRIQUES][3];  // [x, y, actif]
+
+// Détruire une brique (Destroy brick)
+if (phys_toucheBoite(balleX, balleY, 3, 3,
+                     briques[i][0], briques[i][1], 
+                     15, 5)) {
+  briques[i][2] = 0;  // Désactiver
+  vitesseBalleY = -vitesseBalleY;
+  score += 10;
+}</code></pre>
+              </div>
+
+              <div class="code-explanation">
+                <h4>🎲 Génération de Niveaux</h4>
+                <p>Les motifs de briques changent à chaque niveau:</p>
+                <ul>
+                  <li>Niveau 1-2: Rangées simples</li>
+                  <li>Niveau 3-4: Motifs en damier</li>
+                  <li>Niveau 5+: Motifs complexes et aléatoires</li>
+                </ul>
+              </div>
+
+              <div class="code-explanation">
+                <h4>⚡ Augmentation de Difficulté</h4>
+                <p>Le jeu devient plus difficile progressivement:</p>
+                <pre><code>// Vitesse augmente (Speed increases)
+vitesseMax = 2 + (niveau / 3);
+if (vitesse > vitesseMax) vitesse = vitesseMax;</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigation vers autres jeux -->
+        <div class="game-navigation">
+          <a href="aventurier.html" class="nav-game-card">
+            <span class="nav-icon">🏃</span>
+            <span class="nav-text">← Précédent: Aventurier</span>
+          </a>
+          <a href="common-systems.html" class="nav-game-card">
+            <span class="nav-icon">🔧</span>
+            <span class="nav-text">Systèmes Communs</span>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer (Pied de page) -->
+  <footer>
+    <div class="container">
+      <p>🎮 Arcade Sohan - Projet Arduino par Sohan</p>
+      <p class="footer-links">
+        <a href="index.html">Accueil</a> · 
+        <a href="games.html">Les Jeux</a> · 
+        <a href="about.html">À Propos</a> · 
+        <a href="sohan.html">Sohan</a>
+      </p>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎮 Arcade Sohan - Console de Jeux Arduino</title>
+  <meta name="description" content="Une console de jeux arcade faite maison avec Arduino Uno!">
+  <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Navigation (Navigation) -->
+  <header>
+    <nav class="navbar">
+      <div class="container">
+        <div class="logo glow-text">🎮 ARCADE SOHAN</div>
+        <ul class="nav-links">
+          <li><a href="index.html" class="active">Accueil</a></li>
+          <li><a href="games.html">Les Jeux</a></li>
+          <li><a href="about.html">À Propos</a></li>
+          <li><a href="sohan.html">Sohan</a></li>
+        </ul>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Hero Section (Section héros) -->
+  <main>
+    <section class="hero">
+      <div class="container">
+        <div class="hero-content">
+          <h1 class="hero-title glow-text bounce">
+            🎮 ARCADE SOHAN
+          </h1>
+          <p class="hero-subtitle">
+            Une console de jeux arcade faite maison avec Arduino Uno!
+          </p>
+          <p class="hero-description">
+            Découvre une console de jeux 100% artisanale avec écran OLED, 
+            joystick et buzzer. Joue à des jeux d'action, de plateforme et plus encore!
+          </p>
+          <div class="hero-buttons">
+            <a href="games.html" class="btn-arcade btn-primary">Voir les Jeux 🕹️</a>
+            <a href="about.html" class="btn-arcade btn-secondary">Comment ça marche? ⚙️</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Games Preview (Aperçu des jeux) -->
+    <section class="games-preview">
+      <div class="container">
+        <h2 class="section-title">🕹️ Jeux Disponibles</h2>
+        
+        <div class="game-grid">
+          <!-- Monster Hunter -->
+          <div class="game-card">
+            <div class="game-header">
+              <span class="game-icon">👾</span>
+              <h3>Monster Hunter</h3>
+            </div>
+            <p class="game-description">
+              Chasse les monstres et mange la nourriture! Un jeu d'action rapide 
+              en vue du dessus avec des boss épiques.
+            </p>
+            <div class="game-tags">
+              <span class="tag tag-action">Action</span>
+              <span class="tag tag-topdown">Vue du dessus</span>
+            </div>
+            <a href="monster-hunter.html" class="game-link">En savoir plus →</a>
+          </div>
+
+          <!-- Aventurier -->
+          <div class="game-card">
+            <div class="game-header">
+              <span class="game-icon">🏃</span>
+              <h3>Aventurier</h3>
+            </div>
+            <p class="game-description">
+              Saute de plateforme en plateforme pour atteindre la porte! 
+              Un jeu de plateforme avec gravité et physique réaliste.
+            </p>
+            <div class="game-tags">
+              <span class="tag tag-platform">Plateforme</span>
+              <span class="tag tag-puzzle">Puzzle</span>
+            </div>
+            <a href="aventurier.html" class="game-link">En savoir plus →</a>
+          </div>
+
+          <!-- Breakout -->
+          <div class="game-card">
+            <div class="game-header">
+              <span class="game-icon">🧱</span>
+              <h3>Breakout</h3>
+            </div>
+            <p class="game-description">
+              Casse toutes les briques avec la balle! Le classique jeu de casse-briques 
+              avec des niveaux de difficulté croissante.
+            </p>
+            <div class="game-tags">
+              <span class="tag tag-arcade">Arcade</span>
+              <span class="tag tag-classic">Classique</span>
+            </div>
+            <a href="breakout.html" class="game-link">En savoir plus →</a>
+          </div>
+        </div>
+
+        <div class="text-center">
+          <a href="games.html" class="btn-arcade btn-large">Voir tous les jeux 🎮</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features (Caractéristiques) -->
+    <section class="features">
+      <div class="container">
+        <h2 class="section-title">✨ Caractéristiques</h2>
+        
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">📺</div>
+            <h3>Écran OLED</h3>
+            <p>Affichage haute définition 128×64 pixels en noir et blanc</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">🕹️</div>
+            <h3>Joystick Analogique</h3>
+            <p>Contrôle précis avec 2 axes et un bouton d'action</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">🔊</div>
+            <h3>Effets Sonores</h3>
+            <p>Buzzer passif pour des mélodies et sons d'arcade</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">👤</div>
+            <h3>Personnages Débloquables</h3>
+            <p>Gagne des étoiles pour débloquer de nouveaux personnages</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">🎯</div>
+            <h3>Niveaux Infinis</h3>
+            <p>Génération procédurale pour des niveaux sans fin</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">💾</div>
+            <h3>Optimisé RAM</h3>
+            <p>Code ultra-optimisé pour l'Arduino Uno (2KB RAM)</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tech Stack (Technologies) -->
+    <section class="tech-stack">
+      <div class="container">
+        <h2 class="section-title">🔧 Technologies Utilisées</h2>
+        
+        <div class="tech-grid">
+          <div class="tech-item">
+            <span class="tech-label">Microcontrôleur</span>
+            <span class="tech-value">Arduino Uno</span>
+          </div>
+          <div class="tech-item">
+            <span class="tech-label">Langage</span>
+            <span class="tech-value">C++ Arduino</span>
+          </div>
+          <div class="tech-item">
+            <span class="tech-label">Écran</span>
+            <span class="tech-value">OLED I2C 0.96"</span>
+          </div>
+          <div class="tech-item">
+            <span class="tech-label">Mémoire Flash</span>
+            <span class="tech-value">32 KB</span>
+          </div>
+          <div class="tech-item">
+            <span class="tech-label">RAM</span>
+            <span class="tech-value">2 KB</span>
+          </div>
+          <div class="tech-item">
+            <span class="tech-label">Résolution</span>
+            <span class="tech-value">128×64 px</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer (Pied de page) -->
+  <footer>
+    <div class="container">
+      <p>🎮 Arcade Sohan - Projet Arduino par Sohan</p>
+      <p class="footer-links">
+        <a href="games.html">Les Jeux</a> · 
+        <a href="about.html">À Propos</a> · 
+        <a href="sohan.html">Sohan</a> · 
+        <a href="https://github.com" target="_blank">Code Source</a>
+      </p>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

@@ -22,7 +22,7 @@ LIBRARIES_FILE := libraries.txt
 ARDUINO_CLI := arduino-cli
 
 # Targets
-.PHONY: all build upload clean monitor install-libs install-core install list-boards list-ports help
+.PHONY: all build upload clean monitor install-libs install-core install list-boards list-ports serve-website help
 
 # Default target
 all: build
@@ -118,6 +118,16 @@ info:
 	@echo "    Port:        $(PORT)"
 	@echo "    Sketch:      $(SKETCH_DIR)"
 	@echo "    Build dir:   $(BUILD_DIR)"
+
+# -----------------------------------------------------------------------------
+# Website Development
+# -----------------------------------------------------------------------------
+
+## serve-website: Start local web server for the documentation website
+serve-website:
+	@echo "==> Starting web server for documentation website..."
+	@echo "==> Open http://localhost:8080/index.html in your browser"
+	@cd website && python3 -m http.server 8080
 
 # -----------------------------------------------------------------------------
 # Cleanup
