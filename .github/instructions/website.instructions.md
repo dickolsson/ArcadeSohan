@@ -34,51 +34,59 @@ This command:
 
 ### Publishing with GitHub Pages
 
-**Le site doit être publié sur GitHub Pages** pour être accessible publiquement.
+**Le site se déploie automatiquement sur GitHub Pages** via GitHub Actions.
 
-#### Setup GitHub Pages
+#### ✅ Automatic Deployment
 
-1. **Ensure GitHub CLI is installed:**
-   ```bash
-   gh --version
-   ```
+**Workflow configuré:** `.github/workflows/deploy-website.yml`
 
-2. **Push changes to GitHub:**
-   ```bash
-   git add website/
-   git commit -m "docs: update website"
-   git push origin main
-   ```
+Le déploiement se fait automatiquement quand :
+1. Tu push des changements dans `website/`
+2. Tu modifies le fichier workflow lui-même
 
-3. **Enable GitHub Pages using GitHub CLI:**
-   ```bash
-   gh repo edit --enable-pages --pages-branch main --pages-path /website
-   ```
-
-4. **Check deployment status:**
-   ```bash
-   gh run list --workflow=pages-build-deployment
-   ```
-
-**URL du site:** https://USERNAME.github.io/REPOSITORY/
-
-#### Managing with GitHub CLI
-
-**All repository management must use GitHub CLI (`gh`):**
-
-| Task | Command |
-|------|---------|
-| View repo | `gh repo view --web` |
-| Create PR | `gh pr create` |
-| Check status | `gh repo view` |
-| List issues | `gh issue list` |
-| View pages | `gh browse` |
-| Clone repo | `gh repo clone OWNER/REPO` |
-
-**Check GitHub Pages status:**
+**Process:**
 ```bash
-gh api repos/:owner/:repo/pages
+# 1. Modifier les fichiers
+vim website/index.html
+
+# 2. Tester localement
+make serve-website
+
+# 3. Commit et push
+git add website/
+git commit -m "docs: update homepage"
+git push
+
+# 4. GitHub Actions déploie automatiquement! 🚀
 ```
+
+**URL du site:** https://dickolsson.github.io/ArcadeSohan/
+
+#### 🔍 Vérifier le Déploiement
+
+**Sur GitHub:**
+- Actions tab → "Deploy Website" workflow
+- Status: ✅ (vert) = déployé, 🟡 (jaune) = en cours, ❌ (rouge) = erreur
+
+**Badge de statut dans README.md:**
+```markdown
+[![Deploy Website](https://github.com/dickolsson/ArcadeSohan/actions/workflows/deploy-website.yml/badge.svg)](https://github.com/dickolsson/ArcadeSohan/actions/workflows/deploy-website.yml)
+```
+
+#### 🐛 Troubleshooting
+
+**Le workflow ne se lance pas:**
+- Vérifie que GitHub Pages est activé (Settings → Pages → Source: GitHub Actions)
+- Vérifie les permissions du workflow dans `.github/workflows/deploy-website.yml`
+
+**Le site ne se met pas à jour:**
+- Attends 2-3 minutes après le déploiement
+- Rafraîchis avec Ctrl+F5 (vide le cache)
+- Vérifie que le workflow est vert ✅
+
+**Erreur 404:**
+- Assure-toi que le workflow a réussi
+- Vérifie que les fichiers sont dans `website/` et pas à la racine
 
 ---
 
