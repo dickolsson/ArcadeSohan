@@ -196,6 +196,11 @@ Use **Conventional Commits**:
 - `feat: add Space Invaders game`
 - `fix: reduce RAM in level transitions`
 
+**Important:** Always push code to the remote repository after committing:
+```bash
+git push origin main
+```
+
 ---
 
 ## 🌐 Website Development
