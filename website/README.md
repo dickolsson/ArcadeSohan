@@ -107,13 +107,41 @@ Crée un dossier `images/` avec :
 - `arduino-setup.jpg` - Photo du montage
 - `wiring-diagram.png` - Schéma de connexions
 
-## 🌐 Héberger sur GitHub Pages
+## 🌐 Hébergement en Ligne
 
-1. Crée un repo GitHub
-2. Pousse le dossier `website/`
-3. Va dans Settings → Pages
-4. Source: "main branch" → folder: "website"
-5. Ton site sera sur `https://username.github.io/repo-name/`
+**Site web en direct :** [https://dickolsson.github.io/ArcadeSohan/](https://dickolsson.github.io/ArcadeSohan/)
+
+### 🚀 Déploiement Automatique
+
+Le site se déploie automatiquement via **GitHub Actions** :
+
+1. ✅ **Push vers GitHub** - Chaque fois que tu push des modifications dans `website/`
+2. ⚙️ **Workflow automatique** - GitHub Actions se lance (`.github/workflows/deploy-website.yml`)
+3. 🌐 **Mise en ligne** - Le site est publié en quelques secondes sur GitHub Pages
+
+### 📝 Modifier le Site
+
+```bash
+# 1. Modifier les fichiers dans website/
+# 2. Tester en local
+make serve-website
+
+# 3. Commit et push
+git add website/
+git commit -m "docs: update website content"
+git push
+
+# 4. Le site se met à jour automatiquement! 🎉
+```
+
+### 🔧 Configuration GitHub Pages (déjà fait!)
+
+Le workflow GitHub Actions est configuré dans `.github/workflows/deploy-website.yml`
+
+Pour vérifier le déploiement :
+- Va sur GitHub → Actions
+- Regarde le workflow "Deploy Website"
+- Le site sera sur `https://dickolsson.github.io/ArcadeSohan/`
 
 ## 🎨 Personnaliser les Couleurs
 

@@ -1,120 +1,75 @@
-# Monster Hunter - Arduino Game
+# 🎮 Arcade Console Sohan
 
-A Pac-Man style game for Arduino with an OLED display, joystick, and buzzer.
+**A multi-game retro arcade console running on Arduino Uno!** Built to teach a 10-year-old about electronics and programming. 🚀
 
-## Hardware Requirements
+## 🕹️ What is this?
 
-- Arduino Uno (or compatible board)
-- SSD1306 OLED Display (128x64, I2C)
-- Analog Joystick module
-- Buzzer
-- Connecting wires
+A complete **game console system** with:
+- 🎯 **Multiple games** - Monster Hunter, Aventurier, Breakout, and more!
+- 👤 **Unlockable characters** - Earn stars to unlock Blob, Bonhomme, Héros, Champion
+- 📺 **OLED display** - Crisp 128×64 pixel graphics
+- 🎵 **Sound effects** - Buzzer melodies for every action
+- 🔧 **Modular architecture** - Easy to add new games!
 
-### Pin Connections
+## 🎪 Current Games
 
-| Component       | Arduino Pin |
-|-----------------|-------------|
-| Joystick X      | A0          |
-| Joystick Y      | A1          |
-| Joystick Button | 7           |
-| Buzzer          | 8           |
-| OLED SDA        | A4 (I2C)    |
-| OLED SCL        | A5 (I2C)    |
+| Game | Type | Description |
+|------|------|-------------|
+| 🏹 **Monster Hunter** | Top-view shooter | Chase monsters, collect food, fight bosses! |
+| 🏃 **Aventurier** | Platformer | Jump, run, reach the door! |
+| 🧱 **Breakout** | Classic arcade | Bounce the ball, break bricks! |
 
-## Software Requirements
+## 🛠️ Hardware Setup
 
-- [arduino-cli](https://arduino.github.io/arduino-cli/) - Command-line interface for Arduino
+| Component | Pin | 
+|-----------|-----|
+| 📺 OLED SDA | A4 |
+| 📺 OLED SCL | A5 |
+| 🕹️ Joystick X | A0 |
+| 🕹️ Joystick Y | A1 |
+| 🕹️ Joystick Button | D7 |
+| 🔊 Buzzer | D8 |
 
-### Installing arduino-cli
-
-**macOS (Homebrew):**
-```bash
-brew install arduino-cli
-```
-
-**Linux:**
-```bash
-curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
-```
-
-**Windows:**
-Download from [Arduino CLI releases](https://github.com/arduino/arduino-cli/releases)
-
-## Quick Start
-
-1. **Setup** (first time only):
-   ```bash
-   make setup
-   ```
-   This installs the Arduino AVR core and required libraries.
-
-2. **Build** the sketch:
-   ```bash
-   make build
-   ```
-
-3. **Upload** to your Arduino:
-   ```bash
-   make upload
-   ```
-
-4. **Monitor** serial output:
-   ```bash
-   make monitor
-   ```
-
-## Makefile Targets
-
-| Target         | Description                                      |
-|----------------|--------------------------------------------------|
-| `make build`   | Compile the sketch                               |
-| `make upload`  | Compile and upload to Arduino                    |
-| `make clean`   | Remove build artifacts                           |
-| `make monitor` | Open serial monitor (9600 baud)                  |
-| `make setup`   | Install core and libraries                       |
-| `make info`    | Show current configuration                       |
-| `make help`    | Show all available targets                       |
-
-## Configuration
-
-You can override default settings:
+## ⚡ Quick Start
 
 ```bash
-# Use a different board
-make build BOARD_FQBN=arduino:avr:nano
+# 1️⃣ Setup (first time)
+make setup
 
-# Specify serial port manually
-make upload PORT=/dev/cu.usbmodem14101
+# 2️⃣ Build and upload
+make upload
 
-# Use Arduino Mega
-make upload BOARD_FQBN=arduino:avr:mega PORT=/dev/ttyACM0
+# 3️⃣ Play! 🎮
 ```
 
-## Game Instructions
+## 🎯 System Features
 
-- **Move**: Use the joystick to move your character (square)
-- **Shoot**: Press the joystick button to fire
-- **Collect food**: Eat the circles to reload ammo
-- **Avoid/Kill monsters**: Triangle monsters chase you - shoot them!
-- **Boss battles**: Every level up spawns a boss that requires 5 hits
+- ✨ **Character unlock system** - Earn stars to unlock new heroes
+- 🎨 **Smart rendering** - Page buffer mode (saves RAM!)
+- 🔧 **Game templates** - Quick-start structure for new games
+- 💾 **Memory optimized** - Works within Arduino Uno's 2KB RAM
+- 📦 **Object pools** - Efficient management of bullets, coins, enemies
+- 🎲 **Procedural generation** - Infinite levels without using RAM
+- 🔊 **Sound library** - Pre-made melodies for every action
 
-## Libraries Used
+## 📚 Documentation
 
-- [Adafruit GFX Library](https://github.com/adafruit/Adafruit-GFX-Library)
-- [Adafruit SSD1306](https://github.com/adafruit/Adafruit_SSD1306)
-- [Adafruit BusIO](https://github.com/adafruit/Adafruit_BusIO)
+Full docs in `.github/instructions/` covering:
+- Display, Input, Physics, Objects, Characters
+- Memory management & optimization
+- Creating new games step-by-step
 
-## Project Structure
+**Website:** 🌐 [https://dickolsson.github.io/ArcadeSohan/](https://dickolsson.github.io/ArcadeSohan/)
 
-```
-.
-├── Game/
-│   └── Game.ino      # Main Arduino sketch
-├── Makefile          # Build automation
-├── README.md         # This file
-└── build/            # Compiled output (generated)
-```
+*Local preview:* `make serve-website` or check out `website/` folder
 
-## License
+## 🎓 Educational Project
 
-This project is provided as-is for educational purposes.
+This project teaches:
+- 🔌 Electronics & circuit design
+- 💻 C/C++ programming
+- 🎮 Game development fundamentals
+- 🧠 Memory optimization techniques
+- 🏗️ Software architecture
+
+Perfect for beginners aged 10+ learning Arduino! 🚀
