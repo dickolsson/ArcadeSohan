@@ -132,6 +132,35 @@ a:hover {
   transform: translateY(-2px);
 }
 
+/* Menu Hamburger (Hamburger menu) - Desktop hidden */
+.menu-toggle {
+  display: none;
+  flex-direction: column;
+  cursor: pointer;
+  gap: 5px;
+  z-index: 1001;
+}
+
+.menu-toggle span {
+  width: 30px;
+  height: 3px;
+  background: var(--arcade-cyan);
+  border-radius: 3px;
+  transition: all 0.3s;
+}
+
+.menu-toggle.active span:nth-child(1) {
+  transform: rotate(45deg) translate(8px, 8px);
+}
+
+.menu-toggle.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.menu-toggle.active span:nth-child(3) {
+  transform: rotate(-45deg) translate(8px, -8px);
+}
+
 /* === EFFETS DE BRILLANCE (Glow effects) === */
 .glow-text {
   text-shadow: 
@@ -1351,13 +1380,36 @@ footer p {
 
 /* Mobile (Mobile) */
 @media (max-width: 767px) {
+  /* Afficher le bouton hamburger (Show hamburger button) */
+  .menu-toggle {
+    display: flex;
+  }
+  
+  /* Menu mobile (Mobile menu) */
   .nav-links {
-    gap: var(--spacing-xs);
+    position: fixed;
+    top: 0;
+    right: -100%;
+    height: 100vh;
+    width: 250px;
+    background: var(--bg-darker);
+    border-left: 3px solid var(--arcade-cyan);
+    flex-direction: column;
+    padding: 80px 20px 20px;
+    gap: var(--spacing-md);
+    transition: right 0.3s ease-in-out;
+    box-shadow: -5px 0 20px rgba(0, 0, 0, 0.5);
+  }
+  
+  .nav-links.active {
+    right: 0;
   }
   
   .nav-links a {
-    padding: 0.4rem 0.6rem;
-    font-size: 0.75rem;
+    padding: 1rem;
+    font-size: 1rem;
+    text-align: center;
+    border: 2px solid var(--arcade-cyan);
   }
   
   .logo {
