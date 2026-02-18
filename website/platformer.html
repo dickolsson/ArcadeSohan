@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🦁 Super Animal Run - Arcade Sohan</title>
+  <meta name="description" content="Un jeu de plateforme avec des animaux qui attaquent!">
+  <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* === STYLES DU JEU (Game styles) === */
+    .game-wrapper {
+      text-align: center;
+      padding: var(--spacing-md) 0;
+    }
+
+    .game-canvas-container {
+      position: relative;
+      display: inline-block;
+      border: 4px solid var(--arcade-cyan);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 
+        0 0 20px rgba(0, 212, 255, 0.3),
+        0 0 60px rgba(0, 212, 255, 0.1);
+      background: #1a0a2e;
+    }
+
+    .game-canvas-container:focus-within {
+      border-color: var(--arcade-pink);
+      box-shadow: 
+        0 0 20px rgba(255, 111, 145, 0.3),
+        0 0 60px rgba(255, 111, 145, 0.1);
+    }
+
+    #gameCanvas {
+      display: block;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+
+    .game-hud {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 800px;
+      margin: var(--spacing-sm) auto;
+      padding: var(--spacing-sm);
+      background: var(--bg-card);
+      border-radius: 12px;
+      border: 2px solid var(--arcade-purple);
+    }
+
+    .hud-item {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 0.8rem;
+    }
+
+    .hud-label {
+      color: var(--text-muted);
+      font-size: 0.6rem;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .hud-value {
+      color: var(--arcade-yellow);
+    }
+
+    .hud-lives {
+      color: var(--arcade-pink);
+    }
+
+    .controls-info {
+      max-width: 800px;
+      margin: var(--spacing-md) auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: var(--spacing-sm);
+    }
+
+    .control-key {
+      background: var(--bg-card);
+      padding: var(--spacing-sm);
+      border-radius: 8px;
+      border: 2px solid var(--arcade-purple);
+      text-align: center;
+    }
+
+    .key-icon {
+      font-size: 1.5rem;
+      margin-bottom: 4px;
+    }
+
+    .key-label {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 0.6rem;
+      color: var(--arcade-cyan);
+    }
+
+    .game-message {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 0.8rem;
+      color: var(--arcade-green);
+      margin-top: var(--spacing-sm);
+      min-height: 1.5rem;
+    }
+
+    /* Responsive canvas (Canvas responsive) */
+    @media (max-width: 850px) {
+      #gameCanvas {
+        width: 100%;
+        height: auto;
+      }
+      .game-hud {
+        flex-wrap: wrap;
+        gap: var(--spacing-xs);
+      }
+      .hud-item {
+        font-size: 0.65rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Menu Overlay (Fond sombre pour menu mobile) -->
+  <div class="menu-overlay" id="menu-overlay"></div>
+
+  <!-- Navigation (Navigation) -->
+  <header>
+    <nav class="navbar">
+      <div class="container">
+        <div class="logo glow-text">🎮 ARCADE SOHAN</div>
+        <div class="menu-toggle" id="menu-toggle">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <ul class="nav-links" id="nav-links">
+          <li><a href="index.html">Accueil</a></li>
+          <li><a href="games.html">Les Jeux</a></li>
+          <li><a href="platformer.html" class="active">Super Animal Run</a></li>
+          <li><a href="about.html">À Propos</a></li>
+          <li><a href="sohan.html">Sohan</a></li>
+        </ul>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Page Header (En-tête de page) -->
+    <section class="page-header">
+      <div class="container">
+        <h1 class="glow-text">🦁 Super Animal Run</h1>
+        <p>Saute sur les plateformes et évite les animaux sauvages!</p>
+      </div>
+    </section>
+
+    <!-- Game Section (Section du jeu) -->
+    <section class="game-wrapper">
+      <div class="container">
+        <!-- HUD (Affichage tête haute) -->
+        <div class="game-hud">
+          <div class="hud-item">
+            <span class="hud-label">SCORE</span>
+            <span class="hud-value" id="hud-score">0</span>
+          </div>
+          <div class="hud-item">
+            <span class="hud-label">NIVEAU</span>
+            <span class="hud-value" id="hud-level">1</span>
+          </div>
+          <div class="hud-item">
+            <span class="hud-label">PIÈCES</span>
+            <span class="hud-value" id="hud-coins">0</span>
+          </div>
+          <div class="hud-item">
+            <span class="hud-label">VIES</span>
+            <span class="hud-lives" id="hud-lives">❤️❤️❤️</span>
+          </div>
+        </div>
+
+        <!-- Canvas du jeu (Game canvas) -->
+        <div class="game-canvas-container">
+          <canvas id="gameCanvas" width="800" height="450"></canvas>
+        </div>
+
+        <!-- Message du jeu (Game message) -->
+        <div class="game-message" id="game-message">Appuie sur ESPACE pour commencer! 🎮</div>
+
+        <!-- Contrôles (Controls) -->
+        <div class="controls-info">
+          <div class="control-key">
+            <div class="key-icon">⬅️ ➡️</div>
+            <div class="key-label">Flèches: Bouger</div>
+          </div>
+          <div class="control-key">
+            <div class="key-icon">⬆️</div>
+            <div class="key-label">Flèche haut: Sauter</div>
+          </div>
+          <div class="control-key">
+            <div class="key-icon">⏎</div>
+            <div class="key-label">Espace: Commencer</div>
+          </div>
+          <div class="control-key">
+            <div class="key-icon">�</div>
+            <div class="key-label">S: Sauvegarder</div>
+          </div>
+          <div class="control-key">
+            <div class="key-icon">📂</div>
+            <div class="key-label">C: Continuer</div>
+          </div>
+          <div class="control-key">
+            <div class="key-icon">�👾</div>
+            <div class="key-label">Saute sur les ennemis!</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Game Info (Infos du jeu) -->
+    <section class="game-detail">
+      <div class="container">
+        <div class="game-detail-card">
+          <div class="game-detail-header">
+            <span class="game-icon-large">🦁</span>
+            <div>
+              <h2>Comment jouer</h2>
+              <div class="game-tags">
+                <span class="tag tag-platform">Plateforme</span>
+                <span class="tag tag-action">Action</span>
+                <span class="tag tag-arcade">Arcade</span>
+              </div>
+            </div>
+          </div>
+          <div class="game-detail-content">
+            <h3>🎯 Objectif</h3>
+            <p>Cours et saute de plateforme en plateforme! Collecte les pièces pour augmenter 
+              ton score et évite les animaux sauvages. Tu peux les éliminer en leur sautant dessus, 
+              comme dans Super Mario!</p>
+
+            <h3>🕹️ Contrôles</h3>
+            <ul class="controls-list">
+              <li><strong>Flèche gauche / A</strong> — Se déplacer à gauche</li>
+              <li><strong>Flèche droite / D</strong> — Se déplacer à droite</li>
+              <li><strong>Flèche haut / W / Espace</strong> — Sauter</li>
+            </ul>
+
+            <h3>🐾 Les animaux</h3>
+            <ul class="features-list">
+              <li><strong>🐍 Serpent</strong> — Rampe sur les plateformes, lent mais dangereux</li>
+              <li><strong>🦅 Aigle</strong> — Vole dans le ciel et plonge vers toi</li>
+              <li><strong>🐗 Sanglier</strong> — Charge vite sur le sol!</li>
+              <li><strong>🦇 Chauve-souris</strong> — Vole en zigzag et plonge quand tu passes dessous</li>
+            </ul>
+
+            <h3>👑 Les Boss</h3>
+            <ul class="features-list">
+              <li><strong>🦁 Lion</strong> — Boss avec crinière, charge vers toi et saute!</li>
+              <li><strong>🐯 Tigre</strong> — Boss rayé, rapide et féroce!</li>
+              <li>Saute sur leur tête plusieurs fois pour les vaincre</li>
+              <li>Le boss doit être vaincu avant d'atteindre le drapeau</li>
+              <li>Chaque niveau le boss a plus de vie!</li>
+            </ul>
+
+            <h3>💾 Sauvegarde</h3>
+            <ul class="features-list">
+              <li><strong>S</strong> — Sauvegarder ta partie à tout moment</li>
+              <li><strong>C</strong> — Charger ta sauvegarde depuis le menu</li>
+              <li>La partie est sauvegardée automatiquement entre les niveaux</li>
+              <li>Ton meilleur score est gardé en mémoire!</li>
+            </ul>
+
+            <h3>⭐ Astuces</h3>
+            <ul class="features-list">
+              <li>Saute sur la tête des ennemis pour les éliminer et gagner des points!</li>
+              <li>Les pièces dorées donnent 10 points chacune</li>
+              <li>Atteins le drapeau à droite pour passer au niveau suivant</li>
+              <li>Chaque niveau est plus difficile avec plus d'ennemis!</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer (Pied de page) -->
+  <footer>
+    <div class="container">
+      <p>🎮 Arcade Sohan - Projet Arduino par Sohan</p>
+      <p class="footer-links">
+        <a href="index.html">Accueil</a> · 
+        <a href="games.html">Les Jeux</a> · 
+        <a href="about.html">À Propos</a> · 
+        <a href="sohan.html">Sohan</a> · 
+        <a href="https://github.com/dickolsson/ArcadeSohan" target="_blank">Code Source</a>
+      </p>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+  <script src="js/platformer.js"></script>
+</body>
+</html>
