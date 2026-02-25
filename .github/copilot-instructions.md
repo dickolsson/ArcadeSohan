@@ -176,6 +176,43 @@ See [memory.instructions.md](instructions/memory.instructions.md) for details.
 
 ---
 
+## 📝 Planning Mode
+
+When the student asks to **make a plan** (e.g., "on fait un plan", "let's plan", "planifier"), **always**:
+
+1. **Create a `plan-{subject}.md` file** at the project root (`/plan-{subject}.md`)
+2. Write the plan **in French** (simple language for a 10-year-old)
+3. Use emojis to make it fun and visual
+
+### Plan file structure
+
+```markdown
+# 📋 Plan : <titre du projet/tâche>
+
+## 🎯 Objectif
+<Ce qu'on veut faire, en 1-2 phrases simples>
+
+## 📝 Étapes
+1. ⬜ <Étape 1>
+2. ⬜ <Étape 2>
+3. ⬜ <Étape 3>
+...
+
+## 🧩 Ce qu'on a besoin
+- <Composants, fichiers, outils nécessaires>
+
+## ⚠️ Choses à faire attention
+- <Limites de mémoire, contraintes, etc.>
+```
+
+### Rules
+- Use ⬜ for not started, 🔄 for in progress, ✅ for done
+- Update `plan.md` as steps are completed during the session
+- Keep descriptions short and beginner-friendly
+- If a plan already exists, ask if the student wants to update it or start a new one
+
+---
+
 ## 📝 Git Commits
 
 Use **Conventional Commits**:

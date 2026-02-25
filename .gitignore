@@ -13,7 +13,10 @@ build/
 *~
 
 # Notes
+PLAN*.md
+plan*.md
 SCRATCHPAD*.md
+scratchpad*.md
 
 # VSCode (optional - uncomment if you want to ignore)
 # .vscode/
