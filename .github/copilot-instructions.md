@@ -192,6 +192,35 @@ When the student asks to **make a plan** (e.g., "on fait un plan", "let's plan",
 ## 🎯 Objectif
 <Ce qu'on veut faire, en 1-2 phrases simples>
 
+## �️ Aperçu visuel
+<ASCII art wireframe showing what the final result should look like>
+
+### Example wireframes:
+
+#### Screen layout (OLED 128×64):
+┌────────────────────────────┐
+│  SCORE: 000    ♥♥♥         │
+│                             │
+│        ★                    │
+│   ●──►          ◆  ◆       │
+│ ▓▓▓▓▓▓▓▓   ▓▓▓▓▓▓▓▓▓▓▓▓▓ │
+└────────────────────────────┘
+
+#### Circuit / wiring diagram:
+  Arduino
+  ┌──────┐
+  │  D8  │───► Buzzer
+  │  A0  │───► Joystick X
+  │  A1  │───► Joystick Y
+  │  A4  │───► OLED SDA
+  │  A5  │───► OLED SCL
+  └──────┘
+
+#### Game flow:
+  [Menu] ──► [Jeu] ──► [Game Over]
+    ▲                      │
+    └──────────────────────┘
+
 ## 📝 Étapes
 1. ⬜ <Étape 1>
 2. ⬜ <Étape 2>
@@ -210,6 +239,12 @@ When the student asks to **make a plan** (e.g., "on fait un plan", "let's plan",
 - Update `plan.md` as steps are completed during the session
 - Keep descriptions short and beginner-friendly
 - If a plan already exists, ask if the student wants to update it or start a new one
+- **Always include ASCII art wireframes** in the `🖼️ Aperçu visuel` section:
+  - **Screen layouts:** Show what the OLED display (128×64) will look like using box-drawing characters (`┌─┐│└─┘`)
+  - **Circuit diagrams:** Show pin connections using arrows (`───►`) and boxes
+  - **Game flow:** Show state transitions using boxes and arrows (`[State] ──► [State]`)
+  - Use simple symbols: `●` player, `★` item, `◆` enemy, `▓` platform, `♥` life
+  - Keep wireframes simple enough for a 10-year-old to understand
 
 ---
 
