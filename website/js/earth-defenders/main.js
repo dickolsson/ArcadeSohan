@@ -1,0 +1,662 @@
+// ==========================================================
+// 🎮 MAIN — Boucle de jeu principale (Main game loop)
+// Point d'entrée — orchestre tous les modules
+// ==========================================================
+
+import { GAME_W, GAME_H, STATE, MODE, COIN_SCORE, ENEMY_SCORE, BOSS_SCORE, LEVEL_SCORE,
+         START_LIVES, LEVEL_COLORS, COLORS, EVOLUTION } from './config.js';
+import { initInput, isKeyJustPressed, clearJustPressed, isJump, isPause, isUp, isDown } from '../shared/input.js';
+import { updateParticles, drawParticles, clearParticles } from '../shared/particles.js';
+import { updateCamera, getCameraX, resetCamera, shake, getShake, updateHUD,
+         updateMessage, showNotification, drawNotification } from './renderer.js';
+import { drawTitleScreen, drawModeSelect, drawPauseScreen, drawGameOverScreen,
+         drawLevelWinScreen, drawEvolutionScreen, drawBossIntro, drawVictoryScreen } from './ui.js';
+import { startScene, advanceScene, isSceneActive, updateScene, drawScene } from './story.js';
+import { player, resetPlayer, updatePlayer, drawPlayer, evolvePlayer, getEvolution } from './player.js';
+import { generatePiedLevel, getPlatforms, checkCoinCollection, checkFlagReached,
+         drawPlatforms, drawCoins, drawFlag } from './mode-pied.js';
+import { initCarMode, updateCarMode, drawCarMode, evolveCarMode, getCarState } from './mode-voiture.js';
+import { generateEnemies, updateEnemies, checkEnemyCollisions, drawEnemies, getEnemies } from './enemies.js';
+import { initBoss, updateBoss, checkBossCollisions, drawBoss, getBoss, isBossAlive,
+         isBossDefeated, getBossInfo, clearBoss } from './bosses.js';
+import { activateCompanion, isCompanionActive, resetCompanion,
+         updateCompanion, drawCompanion, getCompanion } from './companion.js';
+import { getLevel, TOTAL_LEVELS } from './levels.js';
+import { initAudio, sfxJump, sfxCoin, sfxHit, sfxEnemyKill, sfxBossHit,
+         sfxLevelWin, sfxGameOver, sfxEvolution, sfxDash, sfxBossDefeat, sfxVictory, sfxClick } from './audio.js';
+import { saveGame, loadGame, hasSave } from './save.js';
+
+// Decor imports
+import { initPlage, drawPlage } from './decors/plage.js';
+import { initForet, drawForet } from './decors/foret.js';
+import { initMontagne, drawMontagne } from './decors/montagne.js';
+import { initVille, drawVille } from './decors/ville.js';
+import { initVolcan, drawVolcan } from './decors/volcan.js';
+import { initDesert, drawDesert } from './decors/desert.js';
+import { initForteresse, drawForteresse } from './decors/forteresse.js';
+import { initUsine, drawUsine } from './decors/usine.js';
+
+// === CANVAS ===
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+canvas.width = GAME_W;
+canvas.height = GAME_H;
+
+// === ÉTAT DU JEU (Game state) ===
+const game = {
+  state: STATE.TITLE,
+  level: 1,
+  score: 0,
+  coins: 0,
+  lives: START_LIVES,
+  mode: MODE.PIED,
+  selectedMode: MODE.PIED,
+  themeName: '',
+  levelWidth: 4000,
+  carEvolutionLevel: 0,
+};
+
+let frameCount = 0;
+let lastEvolution = null;
+let currentLevelData = null;
+
+// === MAP DÉCORS (Decor map) ===
+const DECOR_INIT = {
+  plage: initPlage,
+  foret: initForet,
+  montagne: initMontagne,
+  ville: initVille,
+  volcan: initVolcan,
+  desert: initDesert,
+  forteresse: initForteresse,
+  usine: initUsine,
+};
+
+const DECOR_DRAW = {
+  plage: drawPlage,
+  foret: drawForet,
+  montagne: drawMontagne,
+  ville: drawVille,
+  volcan: drawVolcan,
+  desert: drawDesert,
+  forteresse: drawForteresse,
+  usine: drawUsine,
+};
+
+// =============================================
+// INITIALISATION (Initialization)
+// =============================================
+function init() {
+  initInput();
+  initAudio();
+
+  // Vérifier s'il y a une sauvegarde (Check for save)
+  if (hasSave()) {
+    showNotification('💾 Sauvegarde trouvée! (P pour charger)');
+  }
+
+  // Lancer la boucle (Start loop)
+  requestAnimationFrame(gameLoop);
+}
+
+// =============================================
+// BOUCLE DE JEU (Game loop)
+// =============================================
+function gameLoop(timestamp) {
+  frameCount++;
+
+  // Effacer l'écran (Clear screen)
+  ctx.clearRect(0, 0, GAME_W, GAME_H);
+
+  // Screen shake
+  const shk = getShake();
+  if (shk.x !== 0 || shk.y !== 0) {
+    ctx.save();
+    ctx.translate(shk.x, shk.y);
+  }
+
+  // Machine à états (State machine)
+  switch (game.state) {
+    case STATE.TITLE:    updateTitle(); break;
+    case STATE.STORY:    updateStory(); break;
+    case STATE.MODE_SELECT: updateModeSelect(); break;
+    case STATE.PLAYING:  updatePlaying(); break;
+    case STATE.PAUSED:   updatePaused(); break;
+    case STATE.GAME_OVER: updateGameOver(); break;
+    case STATE.LEVEL_WIN: updateLevelWin(); break;
+    case STATE.EVOLUTION: updateEvolutionScreen(); break;
+    case STATE.BOSS_INTRO: updateBossIntroScreen(); break;
+    case STATE.VICTORY:  updateVictory(); break;
+  }
+
+  // Restore from shake
+  if (shk.x !== 0 || shk.y !== 0) {
+    ctx.restore();
+  }
+
+  // Notifications
+  drawNotification(ctx);
+
+  // Clear input state
+  clearJustPressed();
+
+  requestAnimationFrame(gameLoop);
+}
+
+// =============================================
+// ÉTAT : TITRE (State: Title)
+// =============================================
+function updateTitle() {
+  drawTitleScreen(ctx, frameCount);
+
+  if (isKeyJustPressed(' ')) {
+    sfxClick();
+    game.state = STATE.STORY;
+    startScene('intro');
+  }
+
+  // Charger une sauvegarde avec L (Load save with L)
+  if (isKeyJustPressed('l') && hasSave()) {
+    const save = loadGame();
+    if (save) {
+      game.level = save.level;
+      game.score = save.score;
+      game.coins = save.coins;
+      game.lives = save.lives;
+      player.evolutionLevel = save.evolutionLevel;
+      game.carEvolutionLevel = save.carEvolutionLevel;
+      if (save.hasCompanion) activateCompanion();
+      showNotification('💾 Partie chargée!');
+      sfxClick();
+      startLevel();
+    }
+  }
+}
+
+// =============================================
+// ÉTAT : CINÉMATIQUE (State: Story)
+// =============================================
+function updateStory() {
+  updateScene();
+  drawScene(ctx, frameCount);
+
+  if (isKeyJustPressed(' ')) {
+    sfxClick();
+    const done = advanceScene();
+    if (done) {
+      // Après l'intro, choisir le mode (After intro, choose mode)
+      game.state = STATE.MODE_SELECT;
+    }
+  }
+}
+
+// =============================================
+// ÉTAT : CHOIX DE MODE (State: Mode select)
+// =============================================
+function updateModeSelect() {
+  drawModeSelect(ctx, frameCount, game.selectedMode);
+
+  // Flèche haut = mode à pied, flèche bas = mode voiture (Up = on foot, Down = car)
+  if (isKeyJustPressed('ArrowUp') && game.selectedMode !== MODE.PIED) {
+    sfxClick();
+    game.selectedMode = MODE.PIED;
+  }
+  if (isKeyJustPressed('ArrowDown') && game.selectedMode !== MODE.VOITURE) {
+    sfxClick();
+    game.selectedMode = MODE.VOITURE;
+  }
+
+  if (isKeyJustPressed(' ')) {
+    sfxClick();
+    game.mode = game.selectedMode;
+    startLevel();
+  }
+}
+
+// =============================================
+// DÉMARRER UN NIVEAU (Start a level)
+// =============================================
+function startLevel() {
+  currentLevelData = getLevel(game.level);
+  game.themeName = currentLevelData.nom;
+
+  // Initialiser le décor (Initialize decor)
+  const initDecor = DECOR_INIT[currentLevelData.theme];
+  if (initDecor) initDecor(game.levelWidth);
+
+  // Vérifier la cinématique (Check story)
+  if (currentLevelData.storyBefore && game.state !== STATE.PLAYING) {
+    // La cinématique est déjà jouée avant le mode select
+  }
+
+  // Mode de jeu du niveau (Level game mode)
+  // Si le niveau impose un mode, l'utiliser — sinon utiliser le choix du joueur
+  // (If level forces a mode, use it — otherwise use player's choice)
+  if (currentLevelData.mode) {
+    game.mode = currentLevelData.mode;
+  }
+  const mode = game.mode;
+
+  if (mode === MODE.PIED) {
+    // Générer le niveau à pied (Generate on-foot level)
+    const levelData = generatePiedLevel(game.level, currentLevelData.theme);
+    game.levelWidth = levelData.levelWidth;
+
+    // Réinitialiser le joueur (Reset player)
+    resetPlayer();
+    resetCamera();
+    clearParticles();
+    clearBoss();
+
+    // Générer les ennemis (Generate enemies)
+    generateEnemies(currentLevelData.enemies, currentLevelData.enemyCount, game.levelWidth);
+
+    // Initialiser le boss si nécessaire (Initialize boss if needed)
+    if (currentLevelData.boss) {
+      initBoss(currentLevelData.boss, game.levelWidth);
+    }
+
+    // Compagnon
+    if (isCompanionActive()) {
+      resetCompanion(player.x, player.y);
+    }
+  } else {
+    // Mode voiture (Car mode)
+    initCarMode(game.level);
+    clearParticles();
+    clearBoss();
+  }
+
+  // Boss intro?
+  if (currentLevelData.boss && currentLevelData.storyBefore) {
+    // La story contient déjà l'intro du boss
+  }
+
+  game.state = STATE.PLAYING;
+  updateHUD(game);
+  updateMessage('Niveau ' + game.level + ' — ' + currentLevelData.nom);
+}
+
+// =============================================
+// ÉTAT : JEU EN COURS (State: Playing)
+// =============================================
+function updatePlaying() {
+  // Pause
+  if (isKeyJustPressed('p') || isKeyJustPressed('Escape')) {
+    sfxClick();
+    game.state = STATE.PAUSED;
+    return;
+  }
+
+  if (game.mode === MODE.PIED) {
+    updatePlayingPied();
+  } else {
+    updatePlayingVoiture();
+  }
+}
+
+// --- Mode à pied (On-foot mode) ---
+function updatePlayingPied() {
+  const platforms = getPlatforms();
+  const cameraX = getCameraX();
+  const themeColors = LEVEL_COLORS[currentLevelData.theme] || LEVEL_COLORS.plage;
+
+  // Dessiner le décor (Draw decor)
+  const drawDecor = DECOR_DRAW[currentLevelData.theme];
+  if (drawDecor) drawDecor(ctx, cameraX, frameCount);
+
+  // Dessiner les plateformes (Draw platforms)
+  drawPlatforms(ctx, cameraX, themeColors);
+
+  // Dessiner les pièces (Draw coins)
+  drawCoins(ctx, cameraX, frameCount);
+
+  // Dessiner le drapeau (Draw flag)
+  drawFlag(ctx, cameraX, frameCount);
+
+  // Mettre à jour le joueur (Update player)
+  const fell = updatePlayer(platforms, game.levelWidth);
+  if (fell) {
+    loseLife();
+    return;
+  }
+
+  // Caméra
+  updateCamera(player.x, game.levelWidth);
+
+  // Pièces (Coins)
+  const collected = checkCoinCollection(player);
+  if (collected > 0) {
+    game.coins += collected;
+    game.score += collected * COIN_SCORE;
+    sfxCoin();
+    updateHUD(game);
+  }
+
+  // Ennemis (Enemies)
+  updateEnemies(player);
+  const enemyResult = checkEnemyCollisions(player);
+  if (enemyResult) {
+    if (enemyResult.type === 'kill') {
+      game.score += enemyResult.score;
+      player.vy = -8; // Rebondir (Bounce)
+      sfxEnemyKill();
+      updateHUD(game);
+    } else if (enemyResult.type === 'bounce') {
+      player.vy = -8;
+    } else if (enemyResult.type === 'hit') {
+      if (player.invincible <= 0 && player.shieldTimer <= 0) {
+        loseLife();
+        return;
+      }
+    }
+  }
+
+  // Boss
+  if (isBossAlive()) {
+    updateBoss(player);
+    const bossResult = checkBossCollisions(player);
+    if (bossResult) {
+      if (bossResult.type === 'boss_killed') {
+        game.score += BOSS_SCORE;
+        sfxBossDefeat();
+        shake(20);
+        showNotification('🎉 Boss vaincu!');
+        updateHUD(game);
+      } else if (bossResult.type === 'boss_hit') {
+        game.score += bossResult.score;
+        player.vy = -10;
+        sfxBossHit();
+        shake(8);
+        updateHUD(game);
+      } else if (bossResult.type === 'hit') {
+        if (player.invincible <= 0 && player.shieldTimer <= 0) {
+          loseLife();
+          return;
+        }
+      }
+    }
+  }
+
+  // Compagnon (Companion)
+  if (isCompanionActive()) {
+    updateCompanion(player, getEnemies());
+  }
+
+  // Vérifier le drapeau (Check flag)
+  if (checkFlagReached(player, isBossAlive())) {
+    winLevel();
+    return;
+  }
+
+  // Particules (Particles)
+  updateParticles();
+
+  // Dessiner les ennemis (Draw enemies)
+  drawEnemies(ctx, getCameraX(), frameCount);
+
+  // Dessiner le boss (Draw boss)
+  if (isBossAlive()) {
+    drawBoss(ctx, getCameraX(), frameCount);
+  }
+
+  // Dessiner le compagnon (Draw companion)
+  if (isCompanionActive()) {
+    drawCompanion(ctx, getCameraX(), frameCount);
+  }
+
+  // Dessiner le joueur (Draw player)
+  drawPlayer(ctx, getCameraX(), frameCount);
+
+  // Dessiner les particules (Draw particles)
+  drawParticles(ctx, getCameraX());
+
+  // HUD
+  updateHUD(game);
+}
+
+// --- Mode voiture (Car mode) ---
+function updatePlayingVoiture() {
+  const themeColors = LEVEL_COLORS[currentLevelData.theme] || LEVEL_COLORS.plage;
+
+  // Dessiner le décor (Draw decor)
+  const drawDecor = DECOR_DRAW[currentLevelData.theme];
+  if (drawDecor) drawDecor(ctx, 0, frameCount);
+
+  // Mettre à jour le mode voiture (Update car mode)
+  const result = updateCarMode(game);
+
+  // Dessiner le mode voiture (Draw car mode)
+  drawCarMode(ctx, frameCount, themeColors);
+
+  // Traiter le résultat (Process result)
+  if (result === 'hit') {
+    if (player.shieldTimer <= 0) {
+      loseLife();
+      if (game.lives > 0) {
+        initCarMode(game.level); // Redémarrer la course (Restart race)
+      }
+      return;
+    }
+  } else if (result === 'heart') {
+    game.lives++;
+    showNotification('❤️ +1 Vie!');
+    updateHUD(game);
+  } else if (result === 'win') {
+    winLevel();
+    return;
+  }
+
+  // Particules (Particles)
+  updateParticles();
+  drawParticles(ctx, 0);
+
+  // HUD
+  updateHUD(game);
+}
+
+// =============================================
+// PERDRE UNE VIE (Lose a life)
+// =============================================
+function loseLife() {
+  game.lives--;
+  sfxHit();
+  shake(12);
+  updateHUD(game);
+
+  if (game.lives <= 0) {
+    game.state = STATE.GAME_OVER;
+    sfxGameOver();
+    updateMessage('Game Over!');
+  } else {
+    // Réapparaître (Respawn)
+    player.invincible = 90; // 1.5 secondes (1.5 seconds)
+    resetPlayer();
+    resetCamera();
+    showNotification('💔 -1 Vie! (' + game.lives + ' restantes)');
+  }
+}
+
+// =============================================
+// GAGNER UN NIVEAU (Win a level)
+// =============================================
+function winLevel() {
+  sfxLevelWin();
+  game.score += LEVEL_SCORE;
+  updateHUD(game);
+
+  // Vérifier le compagnon (Check for companion unlock)
+  if (currentLevelData.unlockCompanion && !isCompanionActive()) {
+    activateCompanion();
+    player.hasCompanion = true;
+    showNotification('🐕 Compagnon débloqué!');
+  }
+
+  // Vérifier l'évolution (Check evolution)
+  if (currentLevelData.evolutionAfter) {
+    lastEvolution = evolvePlayer();
+    if (lastEvolution) {
+      game.state = STATE.EVOLUTION;
+      sfxEvolution();
+      return;
+    }
+  }
+
+  // Vérifier si c'est le dernier niveau (Check if last level)
+  if (game.level >= TOTAL_LEVELS) {
+    game.state = STATE.VICTORY;
+    sfxVictory();
+    return;
+  }
+
+  // Cinématique après le niveau (Story after level)
+  if (currentLevelData.storyAfter) {
+    // Passer au niveau suivant puis montrer la cinématique
+    game.state = STATE.LEVEL_WIN;
+  } else {
+    game.state = STATE.LEVEL_WIN;
+  }
+}
+
+// =============================================
+// ÉTAT : PAUSE (State: Paused)
+// =============================================
+function updatePaused() {
+  // Dessiner le jeu en arrière-plan (Draw game in background)
+  if (game.mode === MODE.PIED) {
+    const drawDecor = DECOR_DRAW[currentLevelData.theme];
+    if (drawDecor) drawDecor(ctx, getCameraX(), frameCount);
+    const themeColors = LEVEL_COLORS[currentLevelData.theme] || LEVEL_COLORS.plage;
+    drawPlatforms(ctx, getCameraX(), themeColors);
+    drawPlayer(ctx, getCameraX(), frameCount);
+  }
+
+  drawPauseScreen(ctx);
+
+  if (isKeyJustPressed('p') || isKeyJustPressed('Escape')) {
+    sfxClick();
+    game.state = STATE.PLAYING;
+  }
+
+  // Sauvegarder avec S (Save with S)
+  if (isKeyJustPressed('s')) {
+    const success = saveGame(game, player);
+    showNotification(success ? '💾 Partie sauvegardée!' : '❌ Erreur de sauvegarde');
+    sfxClick();
+  }
+}
+
+// =============================================
+// ÉTAT : GAME OVER (State: Game over)
+// =============================================
+function updateGameOver() {
+  drawGameOverScreen(ctx, frameCount, game);
+
+  if (isKeyJustPressed(' ')) {
+    sfxClick();
+    resetGame();
+  }
+}
+
+// =============================================
+// ÉTAT : NIVEAU GAGNÉ (State: Level win)
+// =============================================
+function updateLevelWin() {
+  drawLevelWinScreen(ctx, frameCount, game);
+
+  if (isKeyJustPressed(' ')) {
+    sfxClick();
+    game.level++;
+
+    if (game.level > TOTAL_LEVELS) {
+      game.state = STATE.VICTORY;
+      sfxVictory();
+      return;
+    }
+
+    // Cinématique avant le prochain niveau? (Story before next level?)
+    const nextLevel = getLevel(game.level);
+    if (nextLevel.storyBefore) {
+      startScene(nextLevel.storyBefore);
+      game.state = STATE.STORY;
+    } else {
+      game.state = STATE.MODE_SELECT;
+    }
+  }
+}
+
+// =============================================
+// ÉTAT : ÉVOLUTION (State: Evolution)
+// =============================================
+function updateEvolutionScreen() {
+  drawEvolutionScreen(ctx, frameCount, lastEvolution);
+
+  if (isKeyJustPressed(' ')) {
+    sfxClick();
+
+    // Vérifier si c'est le dernier niveau (Check if last level)
+    if (game.level >= TOTAL_LEVELS) {
+      game.state = STATE.VICTORY;
+      sfxVictory();
+      return;
+    }
+
+    game.state = STATE.LEVEL_WIN;
+  }
+}
+
+// =============================================
+// ÉTAT : INTRO DU BOSS (State: Boss intro)
+// =============================================
+function updateBossIntroScreen() {
+  const bossId = currentLevelData ? currentLevelData.boss : null;
+  const bossInfo = bossId ? getBossInfo(bossId) : { nom: 'Boss', emoji: '👑', desc: '' };
+  drawBossIntro(ctx, frameCount, bossInfo);
+
+  if (isKeyJustPressed(' ')) {
+    sfxClick();
+    game.state = STATE.PLAYING;
+  }
+}
+
+// =============================================
+// ÉTAT : VICTOIRE (State: Victory)
+// =============================================
+function updateVictory() {
+  drawVictoryScreen(ctx, frameCount, game);
+
+  if (isKeyJustPressed(' ')) {
+    sfxClick();
+    resetGame();
+  }
+}
+
+// =============================================
+// RÉINITIALISER LE JEU (Reset game)
+// =============================================
+function resetGame() {
+  game.state = STATE.TITLE;
+  game.level = 1;
+  game.score = 0;
+  game.coins = 0;
+  game.lives = START_LIVES;
+  game.mode = MODE.PIED;
+  game.selectedMode = MODE.PIED;
+  game.themeName = '';
+  game.carEvolutionLevel = 0;
+  player.evolutionLevel = 0;
+  player.hasCompanion = false;
+  lastEvolution = null;
+  currentLevelData = null;
+  resetPlayer();
+  resetCamera();
+  clearParticles();
+  clearBoss();
+  updateHUD(game);
+  updateMessage('');
+}
+
+// =============================================
+// DÉMARRAGE! (Start!)
+// =============================================
+init();

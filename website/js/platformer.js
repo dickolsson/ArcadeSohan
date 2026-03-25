@@ -3,13 +3,13 @@
 // Un jeu style Super Mario avec des animaux qui attaquent!
 // ==========================================================
 
-(function () {
-  'use strict';
+import { roundRect } from './shared/utils.js';
+import { spawnParticles, updateParticles, drawParticles } from './shared/particles.js';
 
-  // === CANVAS & CONTEXT (Toile et contexte) ===
-  const canvas = document.getElementById('gameCanvas');
-  if (!canvas) return; // Pas sur la bonne page (Not on the right page)
-  const ctx = canvas.getContext('2d');
+// === CANVAS & CONTEXT (Toile et contexte) ===
+const canvas = document.getElementById('gameCanvas');
+if (!canvas) throw new Error('Canvas gameCanvas introuvable');
+const ctx = canvas.getContext('2d');
 
   // === CONSTANTES DU JEU (Game constants) ===
   const GAME_W = 800;            // Largeur du canvas (Canvas width)
@@ -88,7 +88,6 @@
   let cameraX = 0;
   let frameCount = 0;
   let shakeTimer = 0;
-  let particles = [];
   let bestScore = 0;  // Meilleur score sauvegardé (Best saved score)
   let notification = '';    // Message temporaire sur le canvas (Temporary canvas message)
   let notificationTimer = 0;
@@ -435,42 +434,8 @@
     cameraX = 0;
   }
 
-  // === PARTICULES (Particles) ===
-  function spawnParticles(x, y, color, count) {
-    for (let i = 0; i < count; i++) {
-      particles.push({
-        x: x,
-        y: y,
-        vx: (Math.random() - 0.5) * 6,
-        vy: Math.random() * -5 - 2,
-        life: 30 + Math.random() * 20,
-        maxLife: 50,
-        color: color,
-        size: 2 + Math.random() * 4,
-      });
-    }
-  }
-
-  function updateParticles() {
-    for (let i = particles.length - 1; i >= 0; i--) {
-      const p = particles[i];
-      p.x += p.vx;
-      p.y += p.vy;
-      p.vy += 0.15;
-      p.life--;
-      if (p.life <= 0) particles.splice(i, 1);
-    }
-  }
-
-  function drawParticles() {
-    particles.forEach((p) => {
-      const alpha = p.life / p.maxLife;
-      ctx.globalAlpha = alpha;
-      ctx.fillStyle = p.color;
-      ctx.fillRect(p.x - cameraX, p.y, p.size, p.size);
-    });
-    ctx.globalAlpha = 1;
-  }
+  // === Particules importées depuis shared/particles.js ===
+  // (Particles imported from shared/particles.js)
 
   // === MISE À JOUR DU JOUEUR (Player update) ===
   function updatePlayer() {
@@ -1640,20 +1605,8 @@
     ctx.textAlign = 'left';
   }
 
-  // === UTILITAIRE: RECTANGLE ARRONDI (Utility: rounded rectangle) ===
-  function roundRect(ctx, x, y, w, h, r) {
-    ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.lineTo(x + w - r, y);
-    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-    ctx.lineTo(x + w, y + h - r);
-    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-    ctx.lineTo(x + r, y + h);
-    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-    ctx.lineTo(x, y + r);
-    ctx.quadraticCurveTo(x, y, x + r, y);
-    ctx.closePath();
-  }
+  // roundRect importé depuis shared/utils.js
+  // (roundRect imported from shared/utils.js)
 
   // ================================================================
   // ===               BOUCLE PRINCIPALE (MAIN LOOP)               ===
@@ -1697,7 +1650,7 @@
         drawEnemies();
         drawBoss();
         drawPlayer();
-        drawParticles();
+        drawParticles(ctx, cameraX);
         break;
 
       case STATE.PAUSED:
@@ -1725,7 +1678,7 @@
         drawEnemies();
         drawBoss();
         drawPlayer();
-        drawParticles();
+        drawParticles(ctx, cameraX);
         drawGameOver();
         break;
 
@@ -1740,7 +1693,7 @@
         drawEnemies();
         drawBoss();
         drawPlayer();
-        drawParticles();
+        drawParticles(ctx, cameraX);
         drawLevelWin();
         break;
     }
@@ -1761,5 +1714,3 @@
 
   console.log('%c🦁 SUPER ANIMAL RUN 🦁', 'font-size: 20px; color: #FF6F91; font-weight: bold;');
   console.log('%cJeu de plateforme avec des animaux!', 'font-size: 14px; color: #00D4FF;');
-
-})();
