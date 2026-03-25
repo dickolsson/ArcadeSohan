@@ -19,7 +19,7 @@ const BOSS_DATA = {
     color: '#E74C3C',
     speed: 1.4,
     phases: 1,
-    attacks: ['jump', 'charge'],
+    attacks: ['jump_arc', 'charge', 'throw', 'ground_stomp'],
   },
   general_meca: {
     nom: 'Général Méca',
@@ -103,6 +103,10 @@ export function initBoss(bossId, levelWidth) {
     hitTimer: 0,
     shieldUp: false,
     chargeTimer: 0,
+    vy: 0,
+    groundY: GAME_H - TILE - data.h,
+    patrolDir: -1,
+    patrolTimer: 0,
   };
 
   bossProjectiles = [];
@@ -156,18 +160,48 @@ export function updateBoss(player) {
   // Mouvement de charge (Charge movement)
   if (boss.chargeTimer > 0) {
     boss.chargeTimer--;
-    boss.x += chargeDir * (boss.speed * 2);
+    boss.x += chargeDir * (boss.speed * 2.5);
     boss.x = clamp(boss.x, 50, GAME_W + 3000);
   } else {
-    // Mouvement lent vers le joueur (Slow movement toward player)
-    const dx = player.x - boss.x;
-    if (Math.abs(dx) > 60) {
-      boss.x += clamp(dx * 0.01, -boss.speed * 0.5, boss.speed * 0.5);
+    // Patrouiller entre les attaques (Patrol between attacks)
+    boss.patrolTimer--;
+    if (boss.patrolTimer <= 0) {
+      boss.patrolDir = -boss.patrolDir;
+      boss.patrolTimer = 60 + Math.random() * 80;
     }
+    const dx = player.x - boss.x;
+    // Aller vers le joueur si loin, sinon patrouiller (Go to player if far, otherwise patrol)
+    if (Math.abs(dx) > 200) {
+      boss.x += clamp(dx * 0.02, -boss.speed, boss.speed);
+    } else {
+      boss.x += boss.patrolDir * boss.speed * 0.6;
+    }
+    boss.x = clamp(boss.x, 50, GAME_W + 3000);
   }
 
-  // Garder sur le sol (Keep on ground)
-  boss.y = GAME_H - TILE - boss.h;
+  // Gravité et sol (Gravity and ground)
+  boss.vy += 0.5;
+  boss.y += boss.vy;
+  boss.groundY = GAME_H - TILE - boss.h;
+  if (boss.y >= boss.groundY) {
+    // Onde de choc au sol si ground_stomp (Shockwave on landing)
+    if (boss.vy > 8 && currentAttack === 'ground_stomp') {
+      for (let i = 0; i < 4; i++) {
+        bossProjectiles.push({
+          x: boss.x + boss.w / 2,
+          y: GAME_H - TILE - 8,
+          vx: (i < 2 ? -1 : 1) * (2 + i * 0.8),
+          vy: 0,
+          w: 16, h: 8,
+          type: 'wave',
+          life: 50,
+        });
+      }
+      spawnExplosion(boss.x + boss.w / 2, boss.y + boss.h, ['#795548', '#FFE66D'], 12);
+    }
+    boss.y = boss.groundY;
+    boss.vy = 0;
+  }
 
   // Mettre à jour les projectiles du boss (Update boss projectiles)
   for (let i = bossProjectiles.length - 1; i >= 0; i--) {
@@ -185,16 +219,42 @@ export function updateBoss(player) {
 // Effectuer une attaque (Perform an attack)
 function performAttack(attack, player) {
   switch (attack) {
-    case 'jump':
-      boss.chargeTimer = 20;
+    case 'jump_arc':
+      // Sauter en arc vers le joueur (Jump arc toward player)
+      boss.vy = -10;
+      boss.chargeTimer = 25;
       chargeDir = boss.facing;
-      spawnParticles(boss.x + boss.w / 2, boss.y + boss.h, boss.color, 6);
+      spawnParticles(boss.x + boss.w / 2, boss.y + boss.h, boss.color, 8);
       break;
 
     case 'charge':
-      boss.chargeTimer = 30;
+      boss.chargeTimer = 35;
       chargeDir = boss.facing;
       spawnParticles(boss.x + boss.w / 2, boss.y + boss.h / 2, '#FF4444', 8);
+      break;
+
+    case 'throw':
+      // Lancer un projectile vers le joueur (Throw projectile at player)
+      const dx = player.x - boss.x;
+      const dy = player.y - boss.y;
+      const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+      bossProjectiles.push({
+        x: boss.x + boss.w / 2,
+        y: boss.y + boss.h / 2,
+        vx: (dx / dist) * 3.5,
+        vy: (dy / dist) * 3.5 - 1,
+        gravity: 0.08,
+        w: 10, h: 10,
+        type: 'missile',
+        life: 120,
+      });
+      break;
+
+    case 'ground_stomp':
+      // Sauter haut puis écraser le sol (Jump high then slam ground)
+      boss.vy = -13;
+      // L'onde de choc sera créée à l'atterrissage
+      spawnParticles(boss.x + boss.w / 2, boss.y + boss.h, '#795548', 6);
       break;
 
     case 'shield_bash':

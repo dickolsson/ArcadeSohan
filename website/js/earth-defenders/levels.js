@@ -3,7 +3,7 @@
 // Quel thème, quels ennemis, quel boss, quel mode
 // ==========================================================
 
-import { THEMES, MODE } from './config.js';
+import { THEMES } from './config.js';
 
 // === TABLEAU DES NIVEAUX (Level table) ===
 // 8 niveaux — chacun a un thème, un mode, des ennemis, et peut-être un boss
@@ -14,7 +14,6 @@ export const LEVELS = [
     num: 1,
     nom: 'La Plage Mystérieuse',  // Mysterious Beach
     theme: THEMES.PLAGE,
-    mode: null,  // Le joueur choisit (Player chooses)
     enemies: ['soldat'],
     enemyCount: 4,
     boss: null,
@@ -27,7 +26,6 @@ export const LEVELS = [
     num: 2,
     nom: 'La Forêt Enchantée',  // Enchanted Forest
     theme: THEMES.FORET,
-    mode: null,  // Le joueur choisit (Player chooses)
     enemies: ['soldat', 'bouclier'],
     enemyCount: 5,
     boss: null,
@@ -40,7 +38,6 @@ export const LEVELS = [
     num: 3,
     nom: 'Montagne du Boss!',  // Boss Mountain!
     theme: THEMES.MONTAGNE,
-    mode: MODE.PIED,
     enemies: ['soldat', 'bouclier'],
     enemyCount: 3,
     boss: 'mini_destructo',
@@ -54,7 +51,6 @@ export const LEVELS = [
     num: 4,
     nom: 'La Ville en Danger',  // City in Danger
     theme: THEMES.VILLE,
-    mode: null,  // Le joueur choisit (Player chooses)
     enemies: ['soldat', 'lanceur', 'motard'],
     enemyCount: 6,
     boss: null,
@@ -67,7 +63,6 @@ export const LEVELS = [
     num: 5,
     nom: 'Le Volcan Infernal',  // Infernal Volcano
     theme: THEMES.VOLCAN,
-    mode: MODE.PIED,
     enemies: ['soldat', 'lanceur', 'robot'],
     enemyCount: 4,
     boss: 'general_meca',
@@ -80,7 +75,6 @@ export const LEVELS = [
     num: 6,
     nom: 'Le Désert Brûlant',  // Burning Desert
     theme: THEMES.DESERT,
-    mode: null,  // Le joueur choisit (Player chooses)
     enemies: ['bouclier', 'lanceur', 'robot'],
     enemyCount: 6,
     boss: null,
@@ -93,7 +87,6 @@ export const LEVELS = [
     num: 7,
     nom: 'La Forteresse Sombre',  // Dark Fortress
     theme: THEMES.FORTERESSE,
-    mode: MODE.PIED,
     enemies: ['soldat', 'bouclier', 'lanceur', 'robot'],
     enemyCount: 5,
     boss: 'robo_destructo',
@@ -106,7 +99,6 @@ export const LEVELS = [
     num: 8,
     nom: 'L\'Usine du Dr. Destructo',  // Dr. Destructo's Factory
     theme: THEMES.USINE,
-    mode: MODE.PIED,
     enemies: ['soldat', 'bouclier', 'lanceur', 'motard', 'robot'],
     enemyCount: 6,
     boss: 'dr_destructo',

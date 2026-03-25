@@ -3,7 +3,7 @@
 // Écran titre, pause, game over, choix de mode, victoire
 // ==========================================================
 
-import { GAME_W, GAME_H, COLORS, STATE, MODE } from './config.js';
+import { GAME_W, GAME_H, COLORS } from './config.js';
 import { roundRect } from '../shared/utils.js';
 
 // === ÉCRAN TITRE (Title screen) ===
@@ -64,66 +64,12 @@ export function drawTitleScreen(ctx, frameCount) {
   // Modes de jeu (Game modes)
   ctx.fillStyle = COLORS.green;
   ctx.font = '9px "Press Start 2P", cursive';
-  ctx.fillText('🏃 Mode à Pied    🚗 Mode Voiture', GAME_W / 2, 355);
+  ctx.fillText('🏃 Mode Plateforme', GAME_W / 2, 355);
 
   // Crédits (Credits)
   ctx.fillStyle = '#B8B8D1';
   ctx.font = '8px "Press Start 2P", cursive';
   ctx.fillText('🎮 Arcade Sohan', GAME_W / 2, 420);
-
-  ctx.textAlign = 'left';
-}
-
-// === ÉCRAN CHOIX DE MODE (Mode selection screen) ===
-export function drawModeSelect(ctx, frameCount, selectedMode) {
-  ctx.fillStyle = COLORS.overlay;
-  ctx.fillRect(0, 0, GAME_W, GAME_H);
-
-  ctx.textAlign = 'center';
-
-  // Titre (Title)
-  ctx.fillStyle = COLORS.cyan;
-  ctx.font = '20px "Press Start 2P", cursive';
-  ctx.fillText('🎮 CHOISIS TON MODE', GAME_W / 2, 80);
-
-  // Mode à pied (On foot mode)
-  const piedSelected = selectedMode === MODE.PIED;
-  const piedY = 150;
-  ctx.fillStyle = piedSelected ? 'rgba(0, 212, 255, 0.2)' : 'rgba(22, 33, 62, 0.8)';
-  roundRect(ctx, GAME_W / 2 - 200, piedY, 400, 80, 12);
-  ctx.fill();
-  ctx.strokeStyle = piedSelected ? COLORS.cyan : COLORS.purple;
-  ctx.lineWidth = 3;
-  roundRect(ctx, GAME_W / 2 - 200, piedY, 400, 80, 12);
-  ctx.stroke();
-  ctx.fillStyle = COLORS.yellow;
-  ctx.font = '14px "Press Start 2P", cursive';
-  ctx.fillText('🏃 MODE À PIED', GAME_W / 2, piedY + 35);
-  ctx.fillStyle = '#B8B8D1';
-  ctx.font = '8px "Press Start 2P", cursive';
-  ctx.fillText('Courir, sauter, plateforme!', GAME_W / 2, piedY + 60);
-
-  // Mode voiture (Car mode)
-  const voitureSelected = selectedMode === MODE.VOITURE;
-  const voitY = 260;
-  ctx.fillStyle = voitureSelected ? 'rgba(0, 212, 255, 0.2)' : 'rgba(22, 33, 62, 0.8)';
-  roundRect(ctx, GAME_W / 2 - 200, voitY, 400, 80, 12);
-  ctx.fill();
-  ctx.strokeStyle = voitureSelected ? COLORS.cyan : COLORS.purple;
-  ctx.lineWidth = 3;
-  roundRect(ctx, GAME_W / 2 - 200, voitY, 400, 80, 12);
-  ctx.stroke();
-  ctx.fillStyle = COLORS.yellow;
-  ctx.font = '14px "Press Start 2P", cursive';
-  ctx.fillText('🚗 MODE VOITURE', GAME_W / 2, voitY + 35);
-  ctx.fillStyle = '#B8B8D1';
-  ctx.font = '8px "Press Start 2P", cursive';
-  ctx.fillText('Course, combat, turbo!', GAME_W / 2, voitY + 60);
-
-  // Instructions (Instructions)
-  ctx.fillStyle = COLORS.green;
-  ctx.font = '9px "Press Start 2P", cursive';
-  ctx.fillText('⬆️⬇️ pour choisir — ESPACE pour valider', GAME_W / 2, 390);
 
   ctx.textAlign = 'left';
 }

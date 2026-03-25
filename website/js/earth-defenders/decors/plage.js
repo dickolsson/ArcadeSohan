@@ -60,10 +60,10 @@ function drawPalmTree(ctx, x, y, frame) {
 
   // Feuilles (Leaves)
   ctx.fillStyle = '#2D6A4F';
-  const wave = Math.sin(frame * 0.03) * 3;
+  const tilt = Math.sin(frame * 0.01) * 0.2;
   for (let i = 0; i < 5; i++) {
-    const angle = (i / 5) * Math.PI * 2 + frame * 0.005;
-    const lx = Math.cos(angle) * (30 + wave);
+    const angle = (i / 5) * Math.PI * 2 + tilt;
+    const lx = Math.cos(angle) * 30;
     const ly = Math.sin(angle) * 15 - 10;
     ctx.beginPath();
     ctx.ellipse(x + lx, y + ly, 25, 8, angle, 0, Math.PI * 2);

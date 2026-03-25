@@ -36,7 +36,7 @@ export function generatePiedLevel(levelNum, theme) {
     groundX += segLen;
     // Trous — plus fréquents aux niveaux élevés (Gaps)
     if (groundX > 300 && groundX < levelWidth - 400 && Math.random() < 0.25 + levelNum * 0.03) {
-      groundX += 80 + Math.random() * 60;
+      groundX += 50 + Math.random() * 40;
     }
   }
 
@@ -44,8 +44,8 @@ export function generatePiedLevel(levelNum, theme) {
   const numPlatforms = 14 + levelNum * 3;
   for (let i = 0; i < numPlatforms; i++) {
     const px = 200 + Math.random() * (levelWidth - 400);
-    const py = 100 + Math.random() * (GAME_H - 200);
-    const pw = 64 + Math.random() * 96;
+    const py = GAME_H - TILE - 40 - Math.random() * 120;
+    const pw = 80 + Math.random() * 80;
     platforms.push({
       x: px, y: py,
       w: pw, h: 16,
@@ -55,7 +55,7 @@ export function generatePiedLevel(levelNum, theme) {
     // Pièce au-dessus (Coin above)
     if (Math.random() < 0.6) {
       coinList.push({
-        x: px + pw / 2 - 8, y: py - 30,
+        x: px + pw / 2 - 8, y: py - 22,
         w: 16, h: 16,
         collected: false,
         bobOffset: Math.random() * Math.PI * 2,

@@ -8,9 +8,15 @@ import { drawSky, drawClouds, generateClouds } from './decor-base.js';
 
 let leaves = [];
 let butterflies = [];
+let treeOffsets = [];
 
 export function initForet(levelWidth) {
   generateClouds(6, levelWidth);
+  // Offsets aléatoires des arbres (Random tree offsets)
+  treeOffsets = [];
+  for (let i = 0; i < 10; i++) {
+    treeOffsets.push(Math.random() * 40);
+  }
   // Feuilles qui tombent (Falling leaves)
   leaves = [];
   for (let i = 0; i < 30; i++) {
@@ -55,7 +61,7 @@ export function drawForet(ctx, cameraX, frameCount) {
   for (let i = 0; i < 10; i++) {
     const tx = i * 500 + 100 - cameraX * 0.4;
     if (tx < -80 || tx > GAME_W + 80) continue;
-    drawTree(ctx, tx, GAME_H - 32 - 100 - Math.random() * 40, frameCount);
+    drawTree(ctx, tx, GAME_H - 32 - 100 - (treeOffsets[i] || 0), frameCount);
   }
 
   // Champignons (Mushrooms)

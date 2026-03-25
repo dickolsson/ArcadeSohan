@@ -3,19 +3,19 @@
 // Point d'entrée — orchestre tous les modules
 // ==========================================================
 
-import { GAME_W, GAME_H, STATE, MODE, COIN_SCORE, ENEMY_SCORE, BOSS_SCORE, LEVEL_SCORE,
+import { GAME_W, GAME_H, STATE, COIN_SCORE, ENEMY_SCORE, BOSS_SCORE, LEVEL_SCORE,
          START_LIVES, LEVEL_COLORS, COLORS, EVOLUTION } from './config.js';
 import { initInput, isKeyJustPressed, clearJustPressed, isJump, isPause, isUp, isDown } from '../shared/input.js';
 import { updateParticles, drawParticles, clearParticles } from '../shared/particles.js';
 import { updateCamera, getCameraX, resetCamera, shake, getShake, updateHUD,
          updateMessage, showNotification, drawNotification } from './renderer.js';
-import { drawTitleScreen, drawModeSelect, drawPauseScreen, drawGameOverScreen,
+import { drawTitleScreen, drawPauseScreen, drawGameOverScreen,
          drawLevelWinScreen, drawEvolutionScreen, drawBossIntro, drawVictoryScreen } from './ui.js';
 import { startScene, advanceScene, isSceneActive, updateScene, drawScene } from './story.js';
 import { player, resetPlayer, updatePlayer, drawPlayer, evolvePlayer, getEvolution } from './player.js';
 import { generatePiedLevel, getPlatforms, checkCoinCollection, checkFlagReached,
          drawPlatforms, drawCoins, drawFlag } from './mode-pied.js';
-import { initCarMode, updateCarMode, drawCarMode, evolveCarMode, getCarState } from './mode-voiture.js';
+
 import { generateEnemies, updateEnemies, checkEnemyCollisions, drawEnemies, getEnemies } from './enemies.js';
 import { initBoss, updateBoss, checkBossCollisions, drawBoss, getBoss, isBossAlive,
          isBossDefeated, getBossInfo, clearBoss } from './bosses.js';
@@ -49,11 +49,8 @@ const game = {
   score: 0,
   coins: 0,
   lives: START_LIVES,
-  mode: MODE.PIED,
-  selectedMode: MODE.PIED,
   themeName: '',
   levelWidth: 4000,
-  carEvolutionLevel: 0,
 };
 
 let frameCount = 0;
@@ -119,7 +116,6 @@ function gameLoop(timestamp) {
   switch (game.state) {
     case STATE.TITLE:    updateTitle(); break;
     case STATE.STORY:    updateStory(); break;
-    case STATE.MODE_SELECT: updateModeSelect(); break;
     case STATE.PLAYING:  updatePlaying(); break;
     case STATE.PAUSED:   updatePaused(); break;
     case STATE.GAME_OVER: updateGameOver(); break;
@@ -164,7 +160,6 @@ function updateTitle() {
       game.coins = save.coins;
       game.lives = save.lives;
       player.evolutionLevel = save.evolutionLevel;
-      game.carEvolutionLevel = save.carEvolutionLevel;
       if (save.hasCompanion) activateCompanion();
       showNotification('💾 Partie chargée!');
       sfxClick();
@@ -184,32 +179,9 @@ function updateStory() {
     sfxClick();
     const done = advanceScene();
     if (done) {
-      // Après l'intro, choisir le mode (After intro, choose mode)
-      game.state = STATE.MODE_SELECT;
+      // Après l'intro, lancer le niveau (After intro, start level)
+      startLevel();
     }
-  }
-}
-
-// =============================================
-// ÉTAT : CHOIX DE MODE (State: Mode select)
-// =============================================
-function updateModeSelect() {
-  drawModeSelect(ctx, frameCount, game.selectedMode);
-
-  // Flèche haut = mode à pied, flèche bas = mode voiture (Up = on foot, Down = car)
-  if (isKeyJustPressed('ArrowUp') && game.selectedMode !== MODE.PIED) {
-    sfxClick();
-    game.selectedMode = MODE.PIED;
-  }
-  if (isKeyJustPressed('ArrowDown') && game.selectedMode !== MODE.VOITURE) {
-    sfxClick();
-    game.selectedMode = MODE.VOITURE;
-  }
-
-  if (isKeyJustPressed(' ')) {
-    sfxClick();
-    game.mode = game.selectedMode;
-    startLevel();
   }
 }
 
@@ -229,42 +201,27 @@ function startLevel() {
     // La cinématique est déjà jouée avant le mode select
   }
 
-  // Mode de jeu du niveau (Level game mode)
-  // Si le niveau impose un mode, l'utiliser — sinon utiliser le choix du joueur
-  // (If level forces a mode, use it — otherwise use player's choice)
-  if (currentLevelData.mode) {
-    game.mode = currentLevelData.mode;
+  // Générer le niveau à pied (Generate on-foot level)
+  const levelData = generatePiedLevel(game.level, currentLevelData.theme);
+  game.levelWidth = levelData.levelWidth;
+
+  // Réinitialiser le joueur (Reset player)
+  resetPlayer();
+  resetCamera();
+  clearParticles();
+  clearBoss();
+
+  // Générer les ennemis (Generate enemies)
+  generateEnemies(currentLevelData.enemies, currentLevelData.enemyCount, game.levelWidth);
+
+  // Initialiser le boss si nécessaire (Initialize boss if needed)
+  if (currentLevelData.boss) {
+    initBoss(currentLevelData.boss, game.levelWidth);
   }
-  const mode = game.mode;
 
-  if (mode === MODE.PIED) {
-    // Générer le niveau à pied (Generate on-foot level)
-    const levelData = generatePiedLevel(game.level, currentLevelData.theme);
-    game.levelWidth = levelData.levelWidth;
-
-    // Réinitialiser le joueur (Reset player)
-    resetPlayer();
-    resetCamera();
-    clearParticles();
-    clearBoss();
-
-    // Générer les ennemis (Generate enemies)
-    generateEnemies(currentLevelData.enemies, currentLevelData.enemyCount, game.levelWidth);
-
-    // Initialiser le boss si nécessaire (Initialize boss if needed)
-    if (currentLevelData.boss) {
-      initBoss(currentLevelData.boss, game.levelWidth);
-    }
-
-    // Compagnon
-    if (isCompanionActive()) {
-      resetCompanion(player.x, player.y);
-    }
-  } else {
-    // Mode voiture (Car mode)
-    initCarMode(game.level);
-    clearParticles();
-    clearBoss();
+  // Compagnon
+  if (isCompanionActive()) {
+    resetCompanion(player.x, player.y);
   }
 
   // Boss intro?
@@ -288,11 +245,7 @@ function updatePlaying() {
     return;
   }
 
-  if (game.mode === MODE.PIED) {
-    updatePlayingPied();
-  } else {
-    updatePlayingVoiture();
-  }
+  updatePlayingPied();
 }
 
 // --- Mode à pied (On-foot mode) ---
@@ -415,46 +368,6 @@ function updatePlayingPied() {
   updateHUD(game);
 }
 
-// --- Mode voiture (Car mode) ---
-function updatePlayingVoiture() {
-  const themeColors = LEVEL_COLORS[currentLevelData.theme] || LEVEL_COLORS.plage;
-
-  // Dessiner le décor (Draw decor)
-  const drawDecor = DECOR_DRAW[currentLevelData.theme];
-  if (drawDecor) drawDecor(ctx, 0, frameCount);
-
-  // Mettre à jour le mode voiture (Update car mode)
-  const result = updateCarMode(game);
-
-  // Dessiner le mode voiture (Draw car mode)
-  drawCarMode(ctx, frameCount, themeColors);
-
-  // Traiter le résultat (Process result)
-  if (result === 'hit') {
-    if (player.shieldTimer <= 0) {
-      loseLife();
-      if (game.lives > 0) {
-        initCarMode(game.level); // Redémarrer la course (Restart race)
-      }
-      return;
-    }
-  } else if (result === 'heart') {
-    game.lives++;
-    showNotification('❤️ +1 Vie!');
-    updateHUD(game);
-  } else if (result === 'win') {
-    winLevel();
-    return;
-  }
-
-  // Particules (Particles)
-  updateParticles();
-  drawParticles(ctx, 0);
-
-  // HUD
-  updateHUD(game);
-}
-
 // =============================================
 // PERDRE UNE VIE (Lose a life)
 // =============================================
@@ -523,13 +436,11 @@ function winLevel() {
 // =============================================
 function updatePaused() {
   // Dessiner le jeu en arrière-plan (Draw game in background)
-  if (game.mode === MODE.PIED) {
-    const drawDecor = DECOR_DRAW[currentLevelData.theme];
-    if (drawDecor) drawDecor(ctx, getCameraX(), frameCount);
-    const themeColors = LEVEL_COLORS[currentLevelData.theme] || LEVEL_COLORS.plage;
-    drawPlatforms(ctx, getCameraX(), themeColors);
-    drawPlayer(ctx, getCameraX(), frameCount);
-  }
+  const drawDecor = DECOR_DRAW[currentLevelData.theme];
+  if (drawDecor) drawDecor(ctx, getCameraX(), frameCount);
+  const themeColors = LEVEL_COLORS[currentLevelData.theme] || LEVEL_COLORS.plage;
+  drawPlatforms(ctx, getCameraX(), themeColors);
+  drawPlayer(ctx, getCameraX(), frameCount);
 
   drawPauseScreen(ctx);
 
@@ -580,7 +491,7 @@ function updateLevelWin() {
       startScene(nextLevel.storyBefore);
       game.state = STATE.STORY;
     } else {
-      game.state = STATE.MODE_SELECT;
+      startLevel();
     }
   }
 }
@@ -640,10 +551,7 @@ function resetGame() {
   game.score = 0;
   game.coins = 0;
   game.lives = START_LIVES;
-  game.mode = MODE.PIED;
-  game.selectedMode = MODE.PIED;
   game.themeName = '';
-  game.carEvolutionLevel = 0;
   player.evolutionLevel = 0;
   player.hasCompanion = false;
   lastEvolution = null;

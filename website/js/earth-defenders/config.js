@@ -11,16 +11,10 @@ export const TILE = 32;
 // === PHYSIQUE (Physics) ===
 export const GRAVITY = 0.42;
 export const FRICTION = 0.85;
-export const JUMP_FORCE = -8;
-export const PLAYER_SPEED = 2;
+export const JUMP_FORCE = -11;
+export const PLAYER_SPEED = 3.5;
 export const LEVEL_WIDTH = 4000;
 
-// === VOITURE (Car mode) ===
-export const CAR_LANES = 3;
-export const CAR_LANE_HEIGHT = 80;
-export const CAR_SPEED = 2.2;
-export const CAR_TURBO_MULT = 1.8;
-export const CAR_TURBO_DURATION = 180; // 3 secondes à 60fps (3 seconds at 60fps)
 
 // === VIES & SCORE (Lives & Score) ===
 export const START_LIVES = 3;
@@ -33,7 +27,6 @@ export const LEVEL_SCORE = 100;
 export const STATE = {
   TITLE: 'title',
   STORY: 'story',
-  MODE_SELECT: 'mode_select',
   PLAYING: 'playing',
   PAUSED: 'paused',
   GAME_OVER: 'game_over',
@@ -43,11 +36,6 @@ export const STATE = {
   VICTORY: 'victory',
 };
 
-// === MODES DE JEU (Game modes) ===
-export const MODE = {
-  PIED: 'pied',       // À pied — plateforme (On foot — platformer)
-  VOITURE: 'voiture',  // En voiture — course (Car — race)
-};
 
 // === NIVEAUX — DÉCORS (Levels — Themes) ===
 export const THEMES = {
@@ -121,10 +109,3 @@ export const EVOLUTION = [
   { nom: 'Champion',     emoji: '⚡', couleur: '#FF6F91', vitesse: 1.5, pouvoirs: ['speed', 'dash', 'shield', 'double_jump'] },
 ];
 
-// === ÉVOLUTION VOITURE (Car evolution) ===
-export const CAR_EVOLUTION = [
-  { nom: 'Petite voiture', emoji: '🚗', couleur: '#4FC3F7', vitesse: 1.0, objets: ['stone'] },
-  { nom: '4x4',            emoji: '🚙', couleur: '#66BB6A', vitesse: 1.1, objets: ['stone', 'oil'] },
-  { nom: 'Voiture de course', emoji: '🏎️', couleur: '#EF5350', vitesse: 1.3, objets: ['stone', 'oil', 'bomb'] },
-  { nom: 'Véhicule blindé',   emoji: '🚀', couleur: '#FFD600', vitesse: 1.5, objets: ['stone', 'oil', 'bomb', 'lightning'] },
-];
