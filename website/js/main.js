@@ -11,6 +11,13 @@ document.addEventListener('DOMContentLoaded', function() {
   const navLinks = document.getElementById('nav-links');
   const menuOverlay = document.getElementById('menu-overlay');
   
+  const closeMenu = () => {
+    menuToggle.classList.remove('active');
+    navLinks.classList.remove('active');
+    if (menuOverlay) menuOverlay.classList.remove('active');
+    document.body.style.overflow = '';
+  };
+
   if (menuToggle && navLinks) {
     // Toggle menu on hamburger click (support touch and click)
     const toggleMenu = (e) => {
@@ -33,14 +40,7 @@ document.addEventListener('DOMContentLoaded', function() {
     links.forEach(link => {
       link.addEventListener('click', (e) => {
         // Let the link navigate, then close menu after a tiny delay
-        setTimeout(() => {
-          menuToggle.classList.remove('active');
-          navLinks.classList.remove('active');
-          if (menuOverlay) {
-            menuOverlay.classList.remove('active');
-          }
-          document.body.style.overflow = '';
-        }, 100);
+        setTimeout(() => closeMenu(), 100);
       });
     });
     
@@ -48,10 +48,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (menuOverlay) {
       const closeOnOverlay = (e) => {
         e.preventDefault();
-        menuToggle.classList.remove('active');
-        navLinks.classList.remove('active');
-        menuOverlay.classList.remove('active');
-        document.body.style.overflow = '';
+        closeMenu();
       };
       menuOverlay.addEventListener('click', closeOnOverlay);
       menuOverlay.addEventListener('touchstart', closeOnOverlay);
@@ -60,18 +57,35 @@ document.addEventListener('DOMContentLoaded', function() {
     // Close menu when clicking outside
     const closeOnOutside = (e) => {
       if (!menuToggle.contains(e.target) && !navLinks.contains(e.target)) {
-        menuToggle.classList.remove('active');
-        navLinks.classList.remove('active');
-        if (menuOverlay) {
-          menuOverlay.classList.remove('active');
-        }
-        document.body.style.overflow = '';
+        closeMenu();
       }
     };
     
     document.addEventListener('click', closeOnOutside);
     document.addEventListener('touchstart', closeOnOutside);
   }
+
+  // === DROPDOWN TOGGLE for mobile (Loisirs menu) ===
+  document.addEventListener('click', (e) => {
+    const toggle = e.target.closest('.dropdown-toggle');
+    if (toggle) {
+      e.preventDefault();
+      e.stopPropagation();
+      const dropdown = toggle.nextElementSibling;
+      const isOpen = dropdown.classList.contains('open');
+      // Close any other open dropdowns
+      document.querySelectorAll('.nav-dropdown.open').forEach(d => d.classList.remove('open'));
+      document.querySelectorAll('.dropdown-toggle.open').forEach(b => {
+        b.classList.remove('open');
+        b.setAttribute('aria-expanded', 'false');
+      });
+      if (!isOpen) {
+        dropdown.classList.add('open');
+        toggle.classList.add('open');
+        toggle.setAttribute('aria-expanded', 'true');
+      }
+    }
+  });
   
   // === SMOOTH SCROLL FOR ANCHOR LINKS (Défilement fluide) ===
   document.querySelectorAll('a[href^="#"]').forEach(anchor => {
