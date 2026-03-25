@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'website/**'
-      - '.github/workflows/deploy-website.yml'
 
   # Permet de lancer manuellement le workflow
   workflow_dispatch:
