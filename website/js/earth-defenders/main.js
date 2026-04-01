@@ -5,7 +5,7 @@
 
 import { GAME_W, GAME_H, STATE, COIN_SCORE, ENEMY_SCORE, BOSS_SCORE, LEVEL_SCORE,
          START_LIVES, LEVEL_COLORS, COLORS, EVOLUTION } from './config.js';
-import { initInput, isKeyJustPressed, clearJustPressed, isJump, isPause, isUp, isDown } from '../shared/input.js';
+import { initInput, isKeyJustPressed, clearJustPressed, isJump, isPause, isUp, isDown, isAction } from '../shared/input.js';
 import { updateParticles, drawParticles, clearParticles } from '../shared/particles.js';
 import { updateCamera, getCameraX, resetCamera, shake, getShake, updateHUD,
          updateMessage, showNotification, drawNotification } from './renderer.js';
@@ -145,7 +145,7 @@ function gameLoop(timestamp) {
 function updateTitle() {
   drawTitleScreen(ctx, frameCount);
 
-  if (isKeyJustPressed(' ')) {
+  if (isAction()) {
     sfxClick();
     game.state = STATE.STORY;
     startScene('intro');
@@ -175,7 +175,7 @@ function updateStory() {
   updateScene();
   drawScene(ctx, frameCount);
 
-  if (isKeyJustPressed(' ')) {
+  if (isAction()) {
     sfxClick();
     const done = advanceScene();
     if (done) {
@@ -463,7 +463,7 @@ function updatePaused() {
 function updateGameOver() {
   drawGameOverScreen(ctx, frameCount, game);
 
-  if (isKeyJustPressed(' ')) {
+  if (isAction()) {
     sfxClick();
     resetGame();
   }
@@ -475,7 +475,7 @@ function updateGameOver() {
 function updateLevelWin() {
   drawLevelWinScreen(ctx, frameCount, game);
 
-  if (isKeyJustPressed(' ')) {
+  if (isAction()) {
     sfxClick();
     game.level++;
 
@@ -502,7 +502,7 @@ function updateLevelWin() {
 function updateEvolutionScreen() {
   drawEvolutionScreen(ctx, frameCount, lastEvolution);
 
-  if (isKeyJustPressed(' ')) {
+  if (isAction()) {
     sfxClick();
 
     // Vérifier si c'est le dernier niveau (Check if last level)
@@ -524,7 +524,7 @@ function updateBossIntroScreen() {
   const bossInfo = bossId ? getBossInfo(bossId) : { nom: 'Boss', emoji: '👑', desc: '' };
   drawBossIntro(ctx, frameCount, bossInfo);
 
-  if (isKeyJustPressed(' ')) {
+  if (isAction()) {
     sfxClick();
     game.state = STATE.PLAYING;
   }
@@ -536,7 +536,7 @@ function updateBossIntroScreen() {
 function updateVictory() {
   drawVictoryScreen(ctx, frameCount, game);
 
-  if (isKeyJustPressed(' ')) {
+  if (isAction()) {
     sfxClick();
     resetGame();
   }

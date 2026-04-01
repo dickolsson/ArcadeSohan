@@ -111,6 +111,29 @@
       min-height: 1.5rem;
     }
 
+    /* === CONTRÔLES TACTILES (Touch controls) === */
+    #touch-controls {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 1000;
+      flex-direction: row;
+    }
+
+    .touch-zone {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
     @media (max-width: 850px) {
       #gameCanvas {
         width: 100%;
@@ -122,6 +145,38 @@
       }
       .hud-item {
         font-size: 0.65rem;
+      }
+    }
+
+    /* === MODE PAYSAGE MOBILE (Mobile landscape mode) === */
+    @media (max-width: 950px) and (orientation: landscape) {
+      header, footer, .page-header, .game-detail, .controls-info, .game-hud, .game-message {
+        display: none !important;
+      }
+      body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+      }
+      main, .game-wrapper, .game-wrapper .container {
+        padding: 0 !important;
+        margin: 0 !important;
+        max-width: 100vw !important;
+      }
+      .game-canvas-container {
+        border: none !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        width: 100vw;
+        height: 100vh;
+      }
+      #gameCanvas {
+        width: 100vw !important;
+        height: 100vh !important;
+      }
+      #touch-controls {
+        top: 0;
+        bottom: 0;
       }
     }
   </style>
@@ -196,6 +251,13 @@
         <!-- Canvas du jeu -->
         <div class="game-canvas-container">
           <canvas id="gameCanvas" width="800" height="450"></canvas>
+        </div>
+
+        <!-- Contrôles tactiles (Touch controls — visible on mobile only) -->
+        <div id="touch-controls">
+          <div class="touch-zone" id="touch-left"></div>
+          <div class="touch-zone" id="touch-middle"></div>
+          <div class="touch-zone" id="touch-right"></div>
         </div>
 
         <!-- Message -->

@@ -139,6 +139,56 @@ const ctx = canvas.getContext('2d');
     keys[e.key] = false;
   });
 
+  // === CONTRÔLES TACTILES (Touch controls) ===
+  const touchState = { left: false, middle: false, right: false };
+  (function initTouchControls() {
+    const overlay = document.getElementById('touch-controls');
+    if (!overlay) return;
+
+    // Montrer les contrôles sur mobile (Show controls on mobile)
+    if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+      overlay.style.display = 'flex';
+    }
+
+    overlay.addEventListener('contextmenu', (e) => e.preventDefault());
+
+    // Multi-touch: lire TOUS les doigts actifs (read ALL active fingers)
+    function updateZonesFromTouches(e) {
+      e.preventDefault();
+      const wasMiddle = touchState.middle;
+
+      touchState.left = false;
+      touchState.middle = false;
+      touchState.right = false;
+
+      const overlayRect = overlay.getBoundingClientRect();
+      const zoneWidth = overlayRect.width / 3;
+
+      for (let i = 0; i < e.touches.length; i++) {
+        const tx = e.touches[i].clientX - overlayRect.left;
+        if (tx < zoneWidth) {
+          touchState.left = true;
+        } else if (tx < zoneWidth * 2) {
+          touchState.middle = true;
+        } else {
+          touchState.right = true;
+        }
+      }
+
+      // Simuler espace pour commencer/relancer (Simulate space for start/restart)
+      if (touchState.middle && !wasMiddle) {
+        if (gameState === STATE.MENU) startGame();
+        else if (gameState === STATE.GAMEOVER) restartGame();
+        else if (gameState === STATE.LEVELWIN) nextLevel();
+      }
+    }
+
+    overlay.addEventListener('touchstart', updateZonesFromTouches, { passive: false });
+    overlay.addEventListener('touchmove', updateZonesFromTouches, { passive: false });
+    overlay.addEventListener('touchend', updateZonesFromTouches, { passive: false });
+    overlay.addEventListener('touchcancel', updateZonesFromTouches, { passive: false });
+  })();
+
   // === JOUEUR (Player) ===
   let player = {
     x: 100, y: 300,
@@ -441,17 +491,17 @@ const ctx = canvas.getContext('2d');
   function updatePlayer() {
     // Mouvement horizontal (Horizontal movement)
     player.vx = 0;
-    if (keys['ArrowLeft'] || keys['a'] || keys['A']) {
+    if (keys['ArrowLeft'] || keys['a'] || keys['A'] || touchState.left) {
       player.vx = -PLAYER_SPEED;
       player.facing = -1;
     }
-    if (keys['ArrowRight'] || keys['d'] || keys['D']) {
+    if (keys['ArrowRight'] || keys['d'] || keys['D'] || touchState.right) {
       player.vx = PLAYER_SPEED;
       player.facing = 1;
     }
 
     // Saut (Jump)
-    if ((keys['ArrowUp'] || keys['w'] || keys['W'] || keys[' ']) && player.onGround) {
+    if ((keys['ArrowUp'] || keys['w'] || keys['W'] || keys[' '] || touchState.middle) && player.onGround) {
       player.vy = JUMP_FORCE;
       player.onGround = false;
       player.jumping = true;

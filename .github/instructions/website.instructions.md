@@ -12,6 +12,15 @@ Instructions pour créer des sites web **colorés**, **amusants** et **faciles �
 
 ## 🔧 Development Workflow
 
+### Opening the Website
+
+**Always open pages in the system browser** (not the VS Code integrated browser).
+
+Use the `open` command on macOS:
+```bash
+open http://localhost:8080/earth-defenders.html
+```
+
 ### Serving the Website Locally
 
 From the project root directory:
