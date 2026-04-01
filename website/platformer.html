@@ -118,6 +118,13 @@
       flex-direction: row;
     }
 
+    /* Montrer seulement en paysage sur mobile (Show only in landscape on mobile) */
+    @media (orientation: landscape) {
+      #touch-controls.touch-enabled {
+        display: flex;
+      }
+    }
+
     .touch-zone {
       flex: 1;
       background: transparent;

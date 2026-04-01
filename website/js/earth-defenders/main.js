@@ -48,7 +48,8 @@ let scaleY = 1;
 
 function resizeCanvas() {
   const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-  if (isMobile) {
+  const isLandscape = window.innerWidth > window.innerHeight;
+  if (isMobile && isLandscape) {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
     scaleX = canvas.width / GAME_W;

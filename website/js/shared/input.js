@@ -39,9 +39,9 @@ function initTouchControls() {
   const overlay = document.getElementById('touch-controls');
   if (!overlay) return;
 
-  // Montrer les contrôles sur mobile (Show controls on mobile)
+  // Activer les contrôles sur mobile (Enable controls on mobile)
   if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
-    overlay.style.display = 'flex';
+    overlay.classList.add('touch-enabled');
   }
 
   overlay.addEventListener('contextmenu', (e) => e.preventDefault());

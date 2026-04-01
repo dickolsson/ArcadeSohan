@@ -21,7 +21,8 @@ const ctx = canvas.getContext('2d');
 
   function resizeCanvas() {
     const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    if (isMobile) {
+    const isLandscape = window.innerWidth > window.innerHeight;
+    if (isMobile && isLandscape) {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
       scaleX = canvas.width / GAME_W;
@@ -167,9 +168,9 @@ const ctx = canvas.getContext('2d');
     const overlay = document.getElementById('touch-controls');
     if (!overlay) return;
 
-    // Montrer les contrôles sur mobile (Show controls on mobile)
+    // Activer les contrôles sur mobile (Enable controls on mobile)
     if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
-      overlay.style.display = 'flex';
+      overlay.classList.add('touch-enabled');
     }
 
     overlay.addEventListener('contextmenu', (e) => e.preventDefault());
