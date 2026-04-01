@@ -175,8 +175,9 @@ const ctx = canvas.getContext('2d');
 
     overlay.addEventListener('contextmenu', (e) => e.preventDefault());
 
-    // Multi-touch: lire TOUS les doigts actifs (read ALL active fingers)
-    function updateZonesFromTouches(e) {
+    // 2 zones: gauche = aller à gauche, droite = aller à droite
+    // 2ème doigt = sauter (2nd finger = jump)
+    function updateFromTouches(e) {
       e.preventDefault();
       const wasMiddle = touchState.middle;
 
@@ -184,32 +185,43 @@ const ctx = canvas.getContext('2d');
       touchState.middle = false;
       touchState.right = false;
 
-      const overlayRect = overlay.getBoundingClientRect();
-      const zoneWidth = overlayRect.width / 3;
+      const midX = overlay.getBoundingClientRect().width / 2;
+      const numTouches = e.touches.length;
 
-      for (let i = 0; i < e.touches.length; i++) {
-        const tx = e.touches[i].clientX - overlayRect.left;
-        if (tx < zoneWidth) {
+      // 2+ doigts = sauter (2+ fingers = jump)
+      if (numTouches >= 2) {
+        touchState.middle = true;
+      }
+
+      // Direction = chaque doigt (Direction = each finger)
+      for (let i = 0; i < numTouches; i++) {
+        const tx = e.touches[i].clientX - overlay.getBoundingClientRect().left;
+        if (tx < midX) {
           touchState.left = true;
-        } else if (tx < zoneWidth * 2) {
-          touchState.middle = true;
         } else {
           touchState.right = true;
         }
       }
 
-      // Simuler espace pour commencer/relancer (Simulate space for start/restart)
+      // Commencer/relancer avec le saut (Start/restart with jump)
       if (touchState.middle && !wasMiddle) {
+        if (gameState === STATE.MENU) startGame();
+        else if (gameState === STATE.GAMEOVER) restartGame();
+        else if (gameState === STATE.LEVELWIN) nextLevel();
+      }
+
+      // 1 doigt = action pour les menus (1 finger = action for menus)
+      if (numTouches === 1 && e.type === 'touchstart') {
         if (gameState === STATE.MENU) startGame();
         else if (gameState === STATE.GAMEOVER) restartGame();
         else if (gameState === STATE.LEVELWIN) nextLevel();
       }
     }
 
-    overlay.addEventListener('touchstart', updateZonesFromTouches, { passive: false });
-    overlay.addEventListener('touchmove', updateZonesFromTouches, { passive: false });
-    overlay.addEventListener('touchend', updateZonesFromTouches, { passive: false });
-    overlay.addEventListener('touchcancel', updateZonesFromTouches, { passive: false });
+    overlay.addEventListener('touchstart', updateFromTouches, { passive: false });
+    overlay.addEventListener('touchmove', updateFromTouches, { passive: false });
+    overlay.addEventListener('touchend', updateFromTouches, { passive: false });
+    overlay.addEventListener('touchcancel', updateFromTouches, { passive: false });
   })();
 
   // === JOUEUR (Player) ===
