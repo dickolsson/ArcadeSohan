@@ -62,6 +62,16 @@ function initTouchControls() {
     // 2+ doigts = sauter (2+ fingers = jump)
     if (numTouches >= 2) {
       touchState.middle = true;
+
+      // Vérifier si les doigts sont des deux côtés (Check if fingers on both sides)
+      let hasLeft = false, hasRight = false;
+      for (let i = 0; i < numTouches; i++) {
+        const tx = e.touches[i].clientX - overlay.getBoundingClientRect().left;
+        if (tx < midX) hasLeft = true;
+        else hasRight = true;
+      }
+      // 2 côtés = saut droit, pas de direction (Both sides = straight jump, no direction)
+      if (hasLeft && hasRight) return finalize();
     }
 
     // Direction = premier doigt seulement (Direction = first finger only)
@@ -74,11 +84,15 @@ function initTouchControls() {
       }
     }
 
-    if (touchState.middle && !wasMiddle) touchJustPressed.middle = true;
+    finalize();
 
-    // 1 doigt tap = action pour les menus seulement (1 finger tap = menu action only, not jump)
-    if (numTouches >= 1 && e.type === 'touchstart') {
-      touchJustPressed.action = true;
+    function finalize() {
+      if (touchState.middle && !wasMiddle) touchJustPressed.middle = true;
+
+      // 1 doigt tap = action pour les menus seulement (1 finger tap = menu action only, not jump)
+      if (numTouches >= 1 && e.type === 'touchstart') {
+        touchJustPressed.action = true;
+      }
     }
   }
 
