@@ -14,6 +14,28 @@ const ctx = canvas.getContext('2d');
   // === CONSTANTES DU JEU (Game constants) ===
   const GAME_W = 800;            // Largeur du canvas (Canvas width)
   const GAME_H = 450;            // Hauteur du canvas (Canvas height)
+
+  // === MISE À L'ÉCHELLE AUTOMATIQUE (Auto-scaling) ===
+  let scaleX = 1;
+  let scaleY = 1;
+
+  function resizeCanvas() {
+    const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    if (isMobile) {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      scaleX = canvas.width / GAME_W;
+      scaleY = canvas.height / GAME_H;
+    } else {
+      canvas.width = GAME_W;
+      canvas.height = GAME_H;
+      scaleX = 1;
+      scaleY = 1;
+    }
+  }
+
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
   const TILE = 32;               // Taille d'une tuile (Tile size)
   const GRAVITY = 0.6;           // Gravité (Gravity)
   const JUMP_FORCE = -12;        // Force du saut (Jump force)
@@ -1664,6 +1686,11 @@ const ctx = canvas.getContext('2d');
 
   function gameLoop() {
     frameCount++;
+
+    // Mise à l'échelle (Scaling)
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.scale(scaleX, scaleY);
 
     // Tremblement d'écran (Screen shake)
     let shakeX = 0, shakeY = 0;

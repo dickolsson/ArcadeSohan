@@ -42,6 +42,28 @@ const ctx = canvas.getContext('2d');
 canvas.width = GAME_W;
 canvas.height = GAME_H;
 
+// === MISE À L'ÉCHELLE AUTOMATIQUE (Auto-scaling) ===
+let scaleX = 1;
+let scaleY = 1;
+
+function resizeCanvas() {
+  const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  if (isMobile) {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    scaleX = canvas.width / GAME_W;
+    scaleY = canvas.height / GAME_H;
+  } else {
+    canvas.width = GAME_W;
+    canvas.height = GAME_H;
+    scaleX = 1;
+    scaleY = 1;
+  }
+}
+
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
 // === ÉTAT DU JEU (Game state) ===
 const game = {
   state: STATE.TITLE,
@@ -103,7 +125,9 @@ function gameLoop(timestamp) {
   frameCount++;
 
   // Effacer l'écran (Clear screen)
-  ctx.clearRect(0, 0, GAME_W, GAME_H);
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.scale(scaleX, scaleY);
 
   // Screen shake
   const shk = getShake();
