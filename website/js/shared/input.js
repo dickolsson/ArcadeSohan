@@ -11,7 +11,7 @@ const justPressed = {};
 
 // État tactile (Touch state) — zones: left, middle, right
 const touchState = { left: false, middle: false, right: false };
-const touchJustPressed = { left: false, middle: false, right: false };
+const touchJustPressed = { left: false, middle: false, right: false, action: false };
 
 // Initialiser les écouteurs (Initialize listeners)
 export function initInput() {
@@ -76,9 +76,9 @@ function initTouchControls() {
 
     if (touchState.middle && !wasMiddle) touchJustPressed.middle = true;
 
-    // 1 doigt = action pour les menus (1 finger tap = action for menus)
+    // 1 doigt tap = action pour les menus seulement (1 finger tap = menu action only, not jump)
     if (numTouches >= 1 && e.type === 'touchstart') {
-      touchJustPressed.middle = true;
+      touchJustPressed.action = true;
     }
   }
 
@@ -107,6 +107,7 @@ export function clearJustPressed() {
   touchJustPressed.left = false;
   touchJustPressed.middle = false;
   touchJustPressed.right = false;
+  touchJustPressed.action = false;
 }
 
 // === Raccourcis pratiques (Convenient shortcuts) ===
@@ -131,7 +132,7 @@ export function isJump() {
 }
 
 export function isAction() {
-  return isKeyJustPressed(' ') || touchJustPressed.middle;
+  return isKeyJustPressed(' ') || touchJustPressed.action;
 }
 
 export function isPause() {
