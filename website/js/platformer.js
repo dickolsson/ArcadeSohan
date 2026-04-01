@@ -191,16 +191,6 @@ const ctx = canvas.getContext('2d');
       // 2+ doigts = sauter (2+ fingers = jump)
       if (numTouches >= 2) {
         touchState.middle = true;
-
-        // Vérifier si les doigts sont des deux côtés (Check if fingers on both sides)
-        let hasLeft = false, hasRight = false;
-        for (let i = 0; i < numTouches; i++) {
-          const tx = e.touches[i].clientX - overlay.getBoundingClientRect().left;
-          if (tx < midX) hasLeft = true;
-          else hasRight = true;
-        }
-        // 2 côtés = saut droit, pas de direction (Both sides = straight jump, no direction)
-        if (hasLeft && hasRight) return finalize();
       }
 
       // Direction = premier doigt seulement (Direction = first finger only)
@@ -213,19 +203,16 @@ const ctx = canvas.getContext('2d');
         }
       }
 
-      finalize();
+      // Commencer/relancer avec le saut (Start/restart with jump)
+      if (touchState.middle && !wasMiddle) {
+        if (gameState === STATE.MENU) startGame();
+        else if (gameState === STATE.GAMEOVER) restartGame();
+        else if (gameState === STATE.LEVELWIN) nextLevel();
+      }
 
-      function finalize() {
-        // Commencer/relancer avec le saut (Start/restart with jump)
-        if (touchState.middle && !wasMiddle) {
-          if (gameState === STATE.MENU) startGame();
-          else if (gameState === STATE.GAMEOVER) restartGame();
-          else if (gameState === STATE.LEVELWIN) nextLevel();
-        }
-
-        // 1 doigt = action pour les menus (1 finger = action for menus)
-        if (numTouches === 1 && e.type === 'touchstart') {
-          if (gameState === STATE.MENU) startGame();
+      // 1 doigt = action pour les menus (1 finger = action for menus)
+      if (numTouches === 1 && e.type === 'touchstart') {
+        if (gameState === STATE.MENU) startGame();
         else if (gameState === STATE.GAMEOVER) restartGame();
         else if (gameState === STATE.LEVELWIN) nextLevel();
       }
