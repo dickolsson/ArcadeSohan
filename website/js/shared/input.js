@@ -64,9 +64,9 @@ function initTouchControls() {
       touchState.middle = true;
     }
 
-    // Direction = premier doigt (Direction = first finger)
-    for (let i = 0; i < numTouches; i++) {
-      const tx = e.touches[i].clientX - overlay.getBoundingClientRect().left;
+    // Direction = premier doigt seulement (Direction = first finger only)
+    if (numTouches >= 1) {
+      const tx = e.touches[0].clientX - overlay.getBoundingClientRect().left;
       if (tx < midX) {
         touchState.left = true;
       } else {

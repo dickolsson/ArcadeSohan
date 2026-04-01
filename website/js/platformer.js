@@ -193,9 +193,9 @@ const ctx = canvas.getContext('2d');
         touchState.middle = true;
       }
 
-      // Direction = chaque doigt (Direction = each finger)
-      for (let i = 0; i < numTouches; i++) {
-        const tx = e.touches[i].clientX - overlay.getBoundingClientRect().left;
+      // Direction = premier doigt seulement (Direction = first finger only)
+      if (numTouches >= 1) {
+        const tx = e.touches[0].clientX - overlay.getBoundingClientRect().left;
         if (tx < midX) {
           touchState.left = true;
         } else {
